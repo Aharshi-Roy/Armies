@@ -1,3 +1,12 @@
+class Unit
+{
+    constructor(name, holds_strength)
+    {
+        this.name = name;
+        this.holds_strength = holds_strength;
+    }
+}
+
 class Player
 {
     constructor(color)
@@ -13,11 +22,6 @@ class Cell
         this.unit_type = unit_type;
         this.strength = strength;
         this.player = player;
-    }
-    holds_strength()
-    {
-        if (this.unit_type == "army" || this.unit_type == "city" || this.unit_type == "navy") return true;
-        return false;
     }
 }
 
@@ -58,7 +62,16 @@ class Game
         this.board[6][2].unit_type = "army";
         this.board[6][1].player = 0;
         this.board[6][1].unit_type = "blockade";
+        this.unit_array = [new Unit("navy", true), new Unit("army", true), new Unit("city", true), new Unit("blockade", false), new Unit("trader", false)];
         this.render();
+    }
+    return_unit(name)
+    {
+        if (name == "navy") return this.unit_array[0];
+        else if (name == "army") return this.unit_array[1];
+        else if (name == "city") return this.unit_array[2];
+        else if (name == "blockade") return this.unit_array[3];
+        else if (name == "trader") return this.unit_array[4];
     }
     set_map(x, y, players, option)
     {
@@ -137,7 +150,7 @@ class Game
                         unit.style.width = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px";
                         unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
-                        if (this.board[i][j].holds_strength()) unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
+                        if (this.return_unit(this.board[i][j].unit_type).holds_strength) unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
                         this.html_board.append(unit);
                     }
                 }
