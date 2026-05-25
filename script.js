@@ -9,9 +9,10 @@ class Unit
 
 class Player
 {
-    constructor(color)
+    constructor(color, hover_color)
     {
         this.color = color;
+        this.hover_color = hover_color;
     }
 }
 class Cell
@@ -109,6 +110,15 @@ class Game
         else if (type == "ore deposit") return "black";
         else return "grey";
     }
+    land_type_to_color_hover(type)
+    {
+        if (type == "land") return "forestgreen";
+        else if (type == "water") return "dodgerblue";
+        else if (type == "soil") return "firebrick";
+        else if (type == "mountain") return "grey";
+        else if (type == "ore deposit") return "grey";
+        else return "grey";
+    }
     render()
     {
         let UNIT_RATIO  = [.8, .2];
@@ -117,7 +127,8 @@ class Game
         {
             for (let j = 0; j < this.BOARD_WIDTH; j++)
             {
-                this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + "' id='" + i + "-" + j + "'></div>";
+                let mouse_instructions = "onmouseover=\"this.style.backgroundColor='" + this.land_type_to_color_hover(this.board[i][j].land_type) +"'\" onmouseout=\"this.style.backgroundColor='" + this.land_type_to_color(this.board[i][j].land_type) + "'\"";
+                this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + "' id='" + i + "-" + j + "'" + mouse_instructions + "></div>";
                 if (this.board[i][j].player != -1)
                 {
                     if (this.board[i][j].unit_type == "navy")
@@ -174,5 +185,5 @@ class Game
     }
 }
 
-let player = new Player("blue");
+let player = new Player("blue", "dodgerblue");
 let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player]);
