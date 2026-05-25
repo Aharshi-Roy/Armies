@@ -59,7 +59,7 @@ class Game
         this.board[5][0].player = 0
         this.board[5][0].unit_type = "trader";
         this.board[6][2].player = 0;
-        this.board[6][2].unit_type = "army";
+        this.board[6][2].unit_type = "city";
         this.board[6][1].player = 0;
         this.board[6][1].unit_type = "blockade";
         this.unit_array = [new Unit("navy", true), new Unit("army", true), new Unit("city", true), new Unit("blockade", false), new Unit("trader", false)];
@@ -150,7 +150,8 @@ class Game
                         unit.style.width = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px";
                         unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
-                        if (this.return_unit(this.board[i][j].unit_type).holds_strength) unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
+                        if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
+                        else if (this.return_unit(this.board[i][j].unit_type).holds_strength && this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
                         this.html_board.append(unit);
                     }
                 }
