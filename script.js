@@ -117,7 +117,7 @@ class Game
         {
             for (let j = 0; j < this.BOARD_WIDTH; j++)
             {
-                this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + this.BOARD_CELL_PIXEL_HEIGHT +"px; width: "+ this.BOARD_CELL_PIXEL_WIDTH + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + "' id='" + i + "-" + j + "'></div>";
+                this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + "' id='" + i + "-" + j + "'></div>";
                 if (this.board[i][j].player != -1)
                 {
                     if (this.board[i][j].unit_type == "navy")
@@ -138,6 +138,20 @@ class Game
                         inner_unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px solid " + this.player_array[this.board[i][j].player].color;
                         inner_unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
                         unit.append(inner_unit);
+                        this.html_board.append(unit);
+                    }
+                    else if (this.board[i][j].unit_type == "blockade")
+                    {
+                        let unit = document.createElement("div");
+                        unit.classList.add(this.board[i][j].unit_type);
+                        unit.style.top = (this.BOARD_CELL_PIXEL_HEIGHT*i) + "px";
+                        unit.style.left = (this.BOARD_CELL_PIXEL_WIDTH*j) + "px";
+                        unit.style.height = (this.BOARD_CELL_PIXEL_HEIGHT)*UNIT_RATIO[0] + "px";
+                        unit.style.width = (this.BOARD_CELL_PIXEL_WIDTH)*UNIT_RATIO[0] + "px";
+                        unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
+                        unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
+                        if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
+                        else if (this.return_unit(this.board[i][j].unit_type).holds_strength && this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
                         this.html_board.append(unit);
                     }
                     else
