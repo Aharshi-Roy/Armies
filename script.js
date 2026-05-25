@@ -127,21 +127,6 @@ class Game
                         unit.append(inner_unit);
                         this.html_board.append(unit);
                     }
-                    else if (this.board[i][j].unit_type == "blockade")
-                    {
-                        let HEIGHT_TO_WIDTH_RATIO = [.8, .2]
-                        let unit = document.createElement("div");
-                        let height = ((this.BOARD_CELL_PIXEL_HEIGHT+this.BOARD_CELL_PIXEL_WIDTH)/2*UNIT_RATIO[0]);
-                        let width = HEIGHT_TO_WIDTH_RATIO[1]*height;
-                        unit.classList.add("blockade");
-                        unit.style.height = height + "px";
-                        unit.style.width = width + "px";
-                        unit.top = (this.BOARD_CELL_PIXEL_HEIGHT-(this.BOARD_CELL_PIXEL_HEIGHT+this.BOARD_CELL_PIXEL_WIDTH)/2)/2;
-                        unit.left = (this.BOARD_CELL_PIXEL_WIDTH-(this.BOARD_CELL_PIXEL_HEIGHT+this.BOARD_CELL_PIXEL_WIDTH)/2*HEIGHT_TO_WIDTH_RATIO[1]);
-                        unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
-                        unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
-                        this.html_board.append(unit);
-                    }
                     else
                     {
                         let unit = document.createElement("div");
