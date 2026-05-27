@@ -110,15 +110,6 @@ class Game
         else if (type == "ore deposit") return "black";
         else return "grey";
     }
-    land_type_to_color_hover(type)
-    {
-        if (type == "land") return "forestgreen";
-        else if (type == "water") return "dodgerblue";
-        else if (type == "soil") return "firebrick";
-        else if (type == "mountain") return "grey";
-        else if (type == "ore deposit") return "grey";
-        else return "grey";
-    }
     render()
     {
         let UNIT_RATIO  = [.8, .2];
@@ -127,8 +118,7 @@ class Game
         {
             for (let j = 0; j < this.BOARD_WIDTH; j++)
             {
-                let mouse_instructions = "onmouseover=\"this.style.backgroundColor='" + this.land_type_to_color_hover(this.board[i][j].land_type) +"'\" onmouseout=\"this.style.backgroundColor='" + this.land_type_to_color(this.board[i][j].land_type) + "'\"";
-                this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + "' id='" + i + "-" + j + "'" + mouse_instructions + "></div>";
+                this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + ";' id='" + i + "-" + j + "'></div>";
                 if (this.board[i][j].player != -1)
                 {
                     if (this.board[i][j].unit_type == "navy")
@@ -148,6 +138,8 @@ class Game
                         inner_unit.style.borderRight = (this.BOARD_CELL_PIXEL_HEIGHT*.5)/2*UNIT_RATIO[0] + "px solid transparent";
                         inner_unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px solid " + this.player_array[this.board[i][j].player].color;
                         inner_unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
+                        inner_unit.setAttribute('onmouseenter', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
+                        inner_unit.setAttribute('onmouseleave', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         unit.append(inner_unit);
                         this.html_board.append(unit);
                     }
@@ -163,12 +155,15 @@ class Game
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
                         if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
                         else if (this.return_unit(this.board[i][j].unit_type).holds_strength && this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
+                        unit.setAttribute('onmouseenter', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
+                        unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         this.html_board.append(unit);
                     }
                     else
                     {
                         let unit = document.createElement("div");
                         unit.classList.add(this.board[i][j].unit_type);
+                        unit.id = i + "-" + j + "-unit";
                         unit.style.top = (this.BOARD_CELL_PIXEL_HEIGHT*i+this.BOARD_CELL_PIXEL_HEIGHT*.25)-((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*(UNIT_RATIO[1]/2) + "px";
                         unit.style.left = (this.BOARD_CELL_PIXEL_WIDTH*j+this.BOARD_CELL_PIXEL_WIDTH*.25)-((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*(UNIT_RATIO[1]/2) + "px";
                         unit.style.height = (this.BOARD_CELL_PIXEL_HEIGHT*.5)*UNIT_RATIO[0] + "px";
@@ -177,6 +172,8 @@ class Game
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
                         if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
                         else if (this.return_unit(this.board[i][j].unit_type).holds_strength && this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
+                        unit.setAttribute('onmouseenter', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
+                        unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         this.html_board.append(unit);
                     }
                 }
