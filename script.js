@@ -171,7 +171,7 @@ class Game
                         unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
                         if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
-                        else if (this.return_unit(this.board[i][j].unit_type).holds_strength && this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
+                        else if (this.return_unit(this.board[i][j].unit_type).holds_strength) unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
                         unit.setAttribute('onmouseenter', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                         unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         this.html_board.append(unit);
