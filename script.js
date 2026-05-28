@@ -38,6 +38,7 @@ class Game
         this.BOARD_CELL_PIXEL_WIDTH = BOARD_PIXEL_WIDTH/BOARD_WIDTH;
         this.BOARD_CELL_PIXEL_HEIGHT = BOARD_PIXEL_HEIGHT/BOARD_HEIGHT;
         this.player_amount = player_amount;
+        this.player_turn = 0;
         this.player_array = player_array;
         this.html_board = document.getElementById(BOARD_ID);
         let map = [];
@@ -65,6 +66,11 @@ class Game
         this.board[6][1].unit_type = "blockade";
         this.unit_array = [new Unit("navy", true), new Unit("army", true), new Unit("city", true), new Unit("blockade", false), new Unit("trader", false)];
         this.render();
+    }
+    update_turn()
+    {
+        if (this.player_turn < this.player_amount) this.player_turn++;
+        else this.player_turn = 0;
     }
     return_unit(name)
     {
