@@ -28,7 +28,7 @@ class Cell
 
 class Game
 {
-    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array)
+    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array, INFO_ID, INFO_WIDTH)
     {
         this.BOARD_ID = BOARD_ID;
         this.BOARD_WIDTH = BOARD_WIDTH;
@@ -41,6 +41,10 @@ class Game
         this.player_turn = 0;
         this.player_array = player_array;
         this.html_board = document.getElementById(BOARD_ID);
+        this.info = document.getElementById(INFO_ID);
+        this.info.style.width = INFO_WIDTH + "px";
+        this.info.style.left = (BOARD_PIXEL_WIDTH + 50) + "px";
+        this.info.style.height = BOARD_PIXEL_HEIGHT/2 + "px";
         let map = [];
         for (let i = 0; i < BOARD_HEIGHT; i++)
         {
@@ -189,4 +193,4 @@ class Game
 }
 
 let player = new Player("blue", "dodgerblue");
-let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player]);
+let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player], "Info", 400);
