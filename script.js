@@ -201,7 +201,7 @@ class Game
                         unit.style.width = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px";
                         unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
-                        if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
+                        if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "</p class='strength'>";
                         if (this.selected_tile[0] == i && this.selected_tile[1] == j)
                         {
                             unit.style.backgroundColor = this.player_array[this.board[i][j].player].hover_color;
@@ -217,6 +217,12 @@ class Game
                     }
                 }
             }
+        }
+        if (this.selected_tile[0] != -1 && this.selected_tile[1] !=-1)
+        {
+            let unit_type = this.get_selected_tile().unit_type
+            unit_type = unit_type[0].toUpperCase() + unit_type.slice(1);
+            this.info.innerHTML = "<h1>" + unit_type + "</h1>";
         }
     }
     change_selected_tile(i, j)
