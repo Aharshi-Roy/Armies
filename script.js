@@ -28,7 +28,7 @@ class Cell
 
 class Game
 {
-    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array, INFO_ID, INFO_WIDTH)
+    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array, INFO_ID, INFO_WIDTH, OBJECT_NAME)
     {
         this.BOARD_ID = BOARD_ID;
         this.BOARD_WIDTH = BOARD_WIDTH;
@@ -37,6 +37,8 @@ class Game
         this.BOARD_PIXEL_HEIGHT = BOARD_PIXEL_HEIGHT;
         this.BOARD_CELL_PIXEL_WIDTH = BOARD_PIXEL_WIDTH/BOARD_WIDTH;
         this.BOARD_CELL_PIXEL_HEIGHT = BOARD_PIXEL_HEIGHT/BOARD_HEIGHT;
+        this.OBJECT_NAME = OBJECT_NAME;
+        this.selected_tile = [-1, -1];
         this.player_amount = player_amount;
         this.player_turn = 0;
         this.player_array = player_array;
@@ -146,13 +148,18 @@ class Game
                         inner_unit.style.left = -(this.BOARD_CELL_PIXEL_WIDTH)*UNIT_RATIO[0]/4 + "px";
                         inner_unit.style.borderLeft = (this.BOARD_CELL_PIXEL_HEIGHT*.5)/2*UNIT_RATIO[0] + "px solid transparent";
                         inner_unit.style.borderRight = (this.BOARD_CELL_PIXEL_HEIGHT*.5)/2*UNIT_RATIO[0] + "px solid transparent";
-                        inner_unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px solid " + this.player_array[this.board[i][j].player].color;
+                        if (this.selected_tile[0] == i && this.selected_tile[1] == j)
+                        {
+                            inner_unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px solid " + this.player_array[this.board[i][j].player].hover_color;
+                        }
+                        else inner_unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px solid " + this.player_array[this.board[i][j].player].color;
                         inner_unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
-                        if (this.player_turn == this.board[i][j].player)
+                        if (this.player_turn == this.board[i][j].player && (this.selected_tile[0] != i || this.selected_tile[1] != j))
                         {
                             inner_unit.setAttribute('onmouseenter', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                             inner_unit.setAttribute('onmouseleave', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
+                        if (this.player_turn == this.board[i][j].player) inner_unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
                         unit.append(inner_unit);
                         this.html_board.append(unit);
                     }
@@ -166,13 +173,17 @@ class Game
                         unit.style.width = (this.BOARD_CELL_PIXEL_WIDTH)*UNIT_RATIO[0] + "px";
                         unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
-                        if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
-                        else if (this.return_unit(this.board[i][j].unit_type).holds_strength && this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
-                        if (this.player_turn == this.board[i][j].player)
+                        if (this.selected_tile[0] == i && this.selected_tile[1] == j)
+                        {
+                            unit.style.backgroundColor = this.player_array[this.board[i][j].player].hover_color;
+                        }
+                        else unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
+                        if (this.player_turn == this.board[i][j].player && (this.selected_tile[0] != i || this.selected_tile[1] != j))
                         {
                             unit.setAttribute('onmouseenter', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                             unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
+                        if (this.player_turn == this.board[i][j].player) unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
                         this.html_board.append(unit);
                     }
                     else
@@ -187,19 +198,31 @@ class Game
                         unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
                         if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "<p class='strength'>";
-                        else if (this.return_unit(this.board[i][j].unit_type).holds_strength) unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
-                        if (this.player_turn == this.board[i][j].player)
+                        if (this.selected_tile[0] == i && this.selected_tile[1] == j)
+                        {
+                            unit.style.backgroundColor = this.player_array[this.board[i][j].player].hover_color;
+                        }
+                        else unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
+                        if (this.player_turn == this.board[i][j].player && (this.selected_tile[0] != i || this.selected_tile[1] != j))
                         {
                             unit.setAttribute('onmouseenter', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                             unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
+                        if (this.player_turn == this.board[i][j].player) unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
                         this.html_board.append(unit);
                     }
                 }
             }
         }
     }
+    change_selected_tile(i, j)
+    {
+        console.log("Called!");
+        this.selected_tile = [i, j]
+        console.log(i + "-" + j);
+        this.render();
+    }
 }
 
 let player = new Player("blue", "dodgerblue");
-let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player], "Info", 400);
+let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player], "Info", 400, "game");
