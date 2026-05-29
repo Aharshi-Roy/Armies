@@ -73,6 +73,10 @@ class Game
         this.unit_array = [new Unit("navy", true), new Unit("army", true), new Unit("city", true), new Unit("blockade", false), new Unit("trader", false)];
         this.render();
     }
+    get_selected_tile()
+    {
+        return this.board[this.selected_tile[0]][this.selected_tile[1]];
+    }
     update_turn()
     {
         if (this.player_turn < this.player_amount) this.player_turn++;
