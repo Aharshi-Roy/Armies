@@ -1,6 +1,6 @@
 class Unit
 {
-    constructor(name, holds_strength)
+    constructor(name, holds_strength, cost, available_tiles, able_build, actions)
     {
         this.name = name;
         this.holds_strength = holds_strength;
@@ -71,7 +71,14 @@ class Game
         this.board[6][2].unit_type = "city";
         this.board[6][1].player = 0;
         this.board[6][1].unit_type = "blockade";
-        this.unit_array = [new Unit("navy", true), new Unit("army", true), new Unit("city", true), new Unit("blockade", false), new Unit("trader", false)];
+        this.unit_array = 
+        [
+            new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
+            new Unit("army", true, 4, ["land", "soil"], ["blockade", "city"], ["transact", "build", "battle", "trade"]),
+            new Unit("city", true, 5, ["soil", "ore deposit"], ["army", "navy", "trader", "blockade", "city"], ["produce", "transact", "build", "battle", "trade"]),
+            new Unit("blockade", false, 4, ["land"], [], ["trade"]),
+            new Unit("trader", false, 3, ["land"], [], ["remove"])
+        ];
         this.render();
     }
     get_selected_tile()
