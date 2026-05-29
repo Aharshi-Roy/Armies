@@ -47,6 +47,7 @@ class Game
         this.info.style.width = INFO_WIDTH + "px";
         this.info.style.left = (BOARD_PIXEL_WIDTH + 50) + "px";
         this.info.style.height = BOARD_PIXEL_HEIGHT/2 + "px";
+        this.info.style.display = "none";
         let map = [];
         for (let i = 0; i < BOARD_HEIGHT; i++)
         {
@@ -220,16 +221,22 @@ class Game
         }
         if (this.selected_tile[0] != -1 && this.selected_tile[1] !=-1)
         {
+            this.info.style.display = "block";
             let unit_type = this.get_selected_tile().unit_type
             unit_type = unit_type[0].toUpperCase() + unit_type.slice(1);
             this.info.innerHTML = "<h1>" + unit_type + "</h1>";
+        }
+        else
+        {
+            this.info.style.display = "none";
         }
     }
     change_selected_tile(i, j)
     {
         console.log("Called!");
-        this.selected_tile = [i, j]
-        console.log(i + "-" + j);
+        if (this.selected_tile[0] != i || this.selected_tile[1] != j) this.selected_tile = [i, j];
+        else this.selected_tile = [-1, -1];
+        console.log(this.selected_tile);
         this.render();
     }
 }
