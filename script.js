@@ -44,10 +44,11 @@ class Cell
 }
 class Action
 {
-    constructor(cells, action_name)
+    constructor(cells, action_name, extra_info)
     {
         this.cells = cells;
         this.action_name = action_name;
+        this.extra_info = extra_info;
     }
 }
 class Game
@@ -63,6 +64,7 @@ class Game
         this.BOARD_CELL_PIXEL_HEIGHT = BOARD_PIXEL_HEIGHT/BOARD_HEIGHT;
         this.OBJECT_NAME = OBJECT_NAME;
         this.selected_tile = [-1, -1];
+        this.actions = [];
         this.player_amount = player_amount;
         this.player_turn = 0;
         this.player_array = player_array;
