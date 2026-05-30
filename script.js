@@ -27,9 +27,29 @@ class Cell
         this.unit_type = unit_type;
         this.strength = strength;
         this.player = player;
+        this.action_state = "unused";
+    }
+    place_unit(name, strength, player)
+    {
+        this.unit_type = name;
+        this.strength = strength;
+        this.player = player;
+    }
+    remove_unit()
+    {
+        this.unit_type = "none";
+        this.strength = 0;
+        this.player = -1;
     }
 }
-
+class Action
+{
+    constructor(cells, action_name)
+    {
+        this.cells = cells;
+        this.action_name = action_name;
+    }
+}
 class Game
 {
     constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array, INFO_ID, INFO_WIDTH, OBJECT_NAME)
@@ -65,11 +85,12 @@ class Game
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
-        this.place_unit([5, 2], "navy", 3, 1);
-        this.place_unit([5, 1], "army", 5, 1);
-        this.place_unit([5, 0], "trader", 0, 0);
-        this.place_unit([6, 1], "blockade", 3, 0);
-        this.place_unit([6, 2], "city", 8, 0);
+        this.get_tile([5, 2]).place_unit("navy", 3, 1);
+        this.get_tile([5, 1]).place_unit("army", 5, 1);
+        this.get_tile([5, 0]).place_unit("trader", 0, 0);
+        this.get_tile([6, 1]).place_unit("blockade", 3, 0);
+        this.get_tile([6, 2]).place_unit("city", 8, 0);
+        this.get_tile([0, 0]).place_unit("city", 8, 2);
         this.unit_array = 
         [
             new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
@@ -80,19 +101,22 @@ class Game
         ];
         this.render();
     }
-    place_unit(coords, name, strength, player)
+    end_turn()
     {
-        let cell = this.board[coords[0]][coords[1]];
-        cell.unit_type = name;
-        cell.strength = strength;
-        cell.player = player;
+        for (let row of this.board)
+        {
+            for (let cell of row)
+            {
+                cell.action_state = "unused";
+            }
+        }
+        this.selected_tile = [-1, -1]
+        this.update_turn();
+        this.render();
     }
-    remove_unit(coords)
+    get_tile(coords)
     {
-        let cell = this.board[coords[0]][coords[1]];
-        cell.unit_type = "none";
-        cell.strength = 0;
-        cell.player = -1;
+        return this.board[coords[0]][coords[1]];
     }
     get_selected_tile()
     {
@@ -100,7 +124,7 @@ class Game
     }
     update_turn()
     {
-        if (this.player_turn < this.player_amount) this.player_turn++;
+        if (this.player_turn < this.player_amount-1) this.player_turn++;
         else this.player_turn = 0;
     }
     return_unit(name)
@@ -264,4 +288,5 @@ class Game
 
 let player = new Player("blue", "dodgerblue");
 let player2 = new Player("red", "pink");
-let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2], "Info", 400, "game");
+let player3 = new Player("forestgreen", "lawngreen")
+let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3], "Info", 400, "game");
