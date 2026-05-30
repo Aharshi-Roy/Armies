@@ -4,6 +4,10 @@ class Unit
     {
         this.name = name;
         this.holds_strength = holds_strength;
+        this.cost = cost;
+        this.available_tiles = available_tiles;
+        this.able_build = able_build;
+        this.actions = actions;
     }
 }
 
