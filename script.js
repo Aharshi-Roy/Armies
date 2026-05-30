@@ -85,6 +85,20 @@ class Game
         ];
         this.render();
     }
+    place_unit(coords, name, strength, player)
+    {
+        let cell = this.board[coords[0]][coords[1]];
+        cell.unit_type = name;
+        cell.strength = strength;
+        cell.player = player;
+    }
+    remove_unit(coords)
+    {
+        let cell = this.board[coords[0]][coords[1]];
+        cell.unit_type = "none";
+        cell.strength = 0;
+        cell.player = -1;
+    }
     get_selected_tile()
     {
         return this.board[this.selected_tile[0]][this.selected_tile[1]];
