@@ -65,16 +65,11 @@ class Game
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
-        this.board[5][2].player = 0
-        this.board[5][2].unit_type = "navy";
-        this.board[5][1].player = 0
-        this.board[5][1].unit_type = "army";
-        this.board[5][0].player = 0
-        this.board[5][0].unit_type = "trader";
-        this.board[6][2].player = 0;
-        this.board[6][2].unit_type = "city";
-        this.board[6][1].player = 0;
-        this.board[6][1].unit_type = "blockade";
+        this.place_unit([5, 2], "navy", 3, 1);
+        this.place_unit([5, 1], "army", 5, 1);
+        this.place_unit([5, 0], "trader", 0, 0);
+        this.place_unit([6, 1], "blockade", 3, 0);
+        this.place_unit([6, 2], "city", 8, 0);
         this.unit_array = 
         [
             new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
@@ -268,4 +263,5 @@ class Game
 }
 
 let player = new Player("blue", "dodgerblue");
-let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player], "Info", 400, "game");
+let player2 = new Player("red", "pink");
+let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2], "Info", 400, "game");
