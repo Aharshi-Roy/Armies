@@ -41,6 +41,16 @@ class Cell
         this.strength = 0;
         this.player = -1;
     }
+    change_strength(change)
+    {
+        if (this.strength+change < 0) return "Too little strength";
+        else if (this.strength+change > 8) return "Too much strength";
+        else
+        {
+            this.strength += change;
+            return "clear";
+        }
+    }
 }
 class Action
 {
@@ -49,6 +59,14 @@ class Action
         this.cells = cells;
         this.action_name = action_name;
         this.extra_info = extra_info;
+    }
+    do_action()
+    {
+        if (this.action_name == "produce") return produce();
+    }
+    produce()
+    {
+        return cells[0].change_strength(1);
     }
 }
 class Game
