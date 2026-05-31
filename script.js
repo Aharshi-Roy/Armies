@@ -62,11 +62,11 @@ class Action
     }
     do_action()
     {
-        if (this.action_name == "produce") return produce();
+        if (this.action_name == "produce") return this.produce();
     }
     produce()
     {
-        return cells[0].change_strength(1);
+        return this.cells[0].change_strength(1);
     }
 }
 class Game
@@ -102,6 +102,8 @@ class Game
             }
         }
         this.board = map;
+        let action = new Action([this.board[6][2]], "produce", "none");
+        this.actions.push(action);
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
@@ -109,7 +111,7 @@ class Game
         this.get_tile([5, 1]).place_unit("army", 5, 1);
         this.get_tile([5, 0]).place_unit("trader", 0, 0);
         this.get_tile([6, 1]).place_unit("blockade", 3, 0);
-        this.get_tile([6, 2]).place_unit("city", 8, 0);
+        this.get_tile([6, 2]).place_unit("city", 5, 0);
         this.get_tile([0, 0]).place_unit("city", 8, 2);
         this.unit_array = 
         [
