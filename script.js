@@ -306,6 +306,15 @@ class Game
         console.log(this.selected_tile);
         this.render();
     }
+    do_all_actions()
+    {
+        for (let action of this.actions)
+        {
+            action.do_action();
+        }
+        actions = [];
+        this.render();
+    }
 }
 
 let player = new Player("blue", "dodgerblue");
