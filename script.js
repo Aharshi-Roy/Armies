@@ -29,27 +29,34 @@ class Cell
         this.player = player;
         this.action_state = "unused";
     }
-    place_unit(name, strength, player)
+    place_unit(name, strength, player, should_use)
     {
         this.unit_type = name;
         this.strength = strength;
         this.player = player;
+        if (should_use) this.use();
     }
-    remove_unit()
+    remove_unit(should_use)
     {
         this.unit_type = "none";
         this.strength = 0;
         this.player = -1;
+        if (should_use) this.use();
     }
-    change_strength(change)
+    change_strength(change, should_use)
     {
         if (this.strength+change < 0) return "Too little strength";
         else if (this.strength+change > 8) return "Too much strength";
         else
         {
             this.strength += change;
+            if (should_use) this.use();
             return "clear";
         }
+    }
+    use()
+    {
+        this.action_state = "used";
     }
 }
 class Action
@@ -72,8 +79,7 @@ class Action
     }
     produce()
     {
-        this.cells[0] = "used";
-        return this.cells[0].change_strength(1);
+        return this.cells[0].change_strength(1, true);
     }
 }
 class Game
@@ -114,12 +120,12 @@ class Game
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
-        this.get_tile([5, 2]).place_unit("navy", 3, 1);
-        this.get_tile([5, 1]).place_unit("army", 5, 1);
-        this.get_tile([5, 0]).place_unit("trader", 0, 0);
-        this.get_tile([6, 1]).place_unit("blockade", 3, 0);
-        this.get_tile([6, 2]).place_unit("city", 5, 0);
-        this.get_tile([0, 0]).place_unit("city", 8, 2);
+        this.get_tile([5, 2]).place_unit("navy", 3, 1, false);
+        this.get_tile([5, 1]).place_unit("army", 5, 1, false);
+        this.get_tile([5, 0]).place_unit("trader", 0, 0, false);
+        this.get_tile([6, 1]).place_unit("blockade", 3, 0, false);
+        this.get_tile([6, 2]).place_unit("city", 5, 0, false);
+        this.get_tile([0, 0]).place_unit("city", 8, 2, false);
         this.unit_array = 
         [
             new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
@@ -317,7 +323,7 @@ class Game
     {
         for (let action of this.actions)
         {
-            action.do_action();
+            console.log(action.do_action());
         }
         this.actions = [];
         this.render();
