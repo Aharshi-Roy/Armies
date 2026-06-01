@@ -62,10 +62,17 @@ class Action
     }
     do_action()
     {
+        let all_unused = true;
+        for (let cell of this.cells)
+        {
+            if (cell.action_state == "used") all_unused = false;
+        }
+        if (!all_unused) return "Cell is used";
         if (this.action_name == "produce") return this.produce();
     }
     produce()
     {
+        this.cells[0] = "used";
         return this.cells[0].change_strength(1);
     }
 }
@@ -312,7 +319,7 @@ class Game
         {
             action.do_action();
         }
-        actions = [];
+        this.actions = [];
         this.render();
     }
 }
