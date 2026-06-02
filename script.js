@@ -71,11 +71,12 @@ class Cell
 }
 class Action
 {
-    constructor(cells, action_name, extra_info)
+    constructor(cells, action_name, extra_info, game)
     {
         this.cells = cells;
         this.action_name = action_name;
         this.extra_info = extra_info;
+        this.game = game;
     }
     do_action()
     {
@@ -90,6 +91,7 @@ class Action
         else if (this.action_name == "transact") return this.transact();
         else if (this.action_name == "move") return this.move();
         else if (this.action_name == "build") return this.build();
+        else if (this.action_name == "battle") return this.battle();
     }
     produce()
     {
@@ -128,14 +130,40 @@ class Action
         this.cells[0].remove_unit(false);
         this.cells[1].load_unit(unit);
         this.cells[1].action_state = "used";
+        return "clear";
     }
     build()
     {
         if (this.cells[0].change_strength(-this.extra_info[1], true) == "clear")
         {
             this.cells[1].place_unit(this.extra_info[0], 1, this.extra_info[2], true);
+            return "clear";
         }
-        else return;
+        else return "invalid";
+    }
+    battle()
+    {
+        let battle_timer = setInterval(() => 
+        {
+            let random_number = Math.floor(Math.random() * 6);
+            if (random_number == 0) this.cells[0].strength -= 2;
+            if (random_number == 1 || random_number == 2) this.cells[0].strength--;
+            if (random_number == 3 || random_number == 4) this.cells[1].strength--;
+            if (random_number == 5) this.cells[1].strength -= 2;
+
+            if (this.cells[0].strength <= 0)
+            {
+                this.cells[0].remove_unit(false)
+                clearInterval(battle_timer);
+            }
+            if (this.cells[1].strength <= 0)
+            {
+                this.cells[1].remove_unit(false);
+                clearInterval(battle_timer);
+            }
+            this.game.render();
+        }, 1000);
+        console.log("Func Finished");
     }
 }
 class Game
@@ -183,7 +211,7 @@ class Game
             }
         }
         this.board = map;
-        let action = new Action([this.board[6][2], this.board[6][3]], "build", ["navy", 5, 0]);
+        let action = new Action([this.board[6][2], this.board[5][2]], "battle", "none", this);
         this.actions.push(action);
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
