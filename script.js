@@ -76,10 +76,39 @@ class Action
         }
         if (!all_unused) return "Cell is used";
         if (this.action_name == "produce") return this.produce();
+        else if (this.action_name == "remove") return this.remove();
+        else if (this.action_name == "transact") return this.transact();
     }
     produce()
     {
         return this.cells[0].change_strength(1, true);
+    }
+    remove()
+    {
+        this.cells[0].remove_unit(false);
+        return "clear";
+    }
+    transact()
+    {
+        // First Cell is giver, second cell is give to
+        let return1 = this.cells[0].change_strength(-this.extra_info, true);
+        let return2 = this.cells[1].change_strength(this.extra_info, true);
+        if (return1 == "clear" && return2 == "clear")
+        {
+            return "clear";
+        }
+        else
+        {
+            if (return1 == "clear")
+            {
+                this.cells[0].change_strength(this.extra_info, true);
+            }
+            if (return2 == "clear")
+            {
+                this.cells[1].change_strength(-this.extra_info, true);
+            }
+            return "invalid";
+        }
     }
 }
 class Game
@@ -115,7 +144,7 @@ class Game
             }
         }
         this.board = map;
-        let action = new Action([this.board[6][2]], "produce", "none");
+        let action = new Action([this.board[6][2], this.board[6][1]], "transact", 3);
         this.actions.push(action);
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
@@ -313,10 +342,8 @@ class Game
     }
     change_selected_tile(i, j)
     {
-        console.log("Called!");
         if (this.selected_tile[0] != i || this.selected_tile[1] != j) this.selected_tile = [i, j];
         else this.selected_tile = [-1, -1];
-        console.log(this.selected_tile);
         this.render();
     }
     do_all_actions()
