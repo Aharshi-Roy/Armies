@@ -29,6 +29,16 @@ class Cell
         this.player = player;
         this.action_state = "unused";
     }
+    save_unit()
+    {
+        return [this.unit_type, this.strength, this.player];
+    }
+    load_unit(array)
+    {
+        this.unit_type = array[0];
+        this.strength = array[1];
+        this.player = array[2];
+    }
     place_unit(name, strength, player, should_use)
     {
         this.unit_type = name;
@@ -78,6 +88,8 @@ class Action
         if (this.action_name == "produce") return this.produce();
         else if (this.action_name == "remove") return this.remove();
         else if (this.action_name == "transact") return this.transact();
+        else if (this.action_name == "move") return this.move();
+        else if (this.action_name == "build") return this.build();
     }
     produce()
     {
@@ -109,6 +121,21 @@ class Action
             }
             return "invalid";
         }
+    }
+    move()
+    {
+        let unit = this.cells[0].save_unit();
+        this.cells[0].remove_unit(false);
+        this.cells[1].load_unit(unit);
+        this.cells[1].action_state = "used";
+    }
+    build()
+    {
+        if (this.cells[0].change_strength(-this.extra_info[1], true) == "clear")
+        {
+            this.cells[1].place_unit(this.extra_info[0], 1, this.extra_info[2], true);
+        }
+        else return;
     }
 }
 class Game
@@ -144,7 +171,7 @@ class Game
             }
         }
         this.board = map;
-        let action = new Action([this.board[6][2], this.board[6][1]], "transact", 3);
+        let action = new Action([this.board[6][2], this.board[6][3]], "build", ["navy", 5, 0]);
         this.actions.push(action);
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
