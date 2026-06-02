@@ -66,3 +66,30 @@ h1
     text-align: center;
     font-size: 30pt;
 }
+
+#DoAction
+{
+    background-color: lightblue;
+    position: absolute;
+    border: 20px solid black;
+    border-radius: 20px;
+    
+}
+
+#EndTurn
+{
+    background-color: greenyellow;
+    position: absolute;
+    border: 20px solid black;
+    border-radius: 20px;
+}
+
+#DoAction:hover
+{
+    background-color: dodgerblue;
+}
+
+#EndTurn:hover
+{
+    background-color: forestgreen;
+}

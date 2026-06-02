@@ -140,7 +140,7 @@ class Action
 }
 class Game
 {
-    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array, INFO_ID, INFO_WIDTH, OBJECT_NAME)
+    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array, INFO_ID, INFO_WIDTH, OBJECT_NAME, DO_ACTION_ID, END_TURN_ID, TURN_BUTTON_HEIGHT)
     {
         this.BOARD_ID = BOARD_ID;
         this.BOARD_WIDTH = BOARD_WIDTH;
@@ -157,9 +157,21 @@ class Game
         this.player_array = player_array;
         this.html_board = document.getElementById(BOARD_ID);
         this.info = document.getElementById(INFO_ID);
+        this.do_action_html = document.getElementById(DO_ACTION_ID);
+        this.end_turn_html = document.getElementById(END_TURN_ID);
         this.info.style.width = INFO_WIDTH + "px";
+        this.do_action_html.style.width = INFO_WIDTH + "px";
+        this.end_turn_html.style.width = INFO_WIDTH + "px";
         this.info.style.left = (BOARD_PIXEL_WIDTH + 50) + "px";
+        this.do_action_html.style.left = (BOARD_PIXEL_WIDTH + 50) + "px";
+        this.end_turn_html.style.left = (BOARD_PIXEL_WIDTH + 50) + "px";
         this.info.style.height = BOARD_PIXEL_HEIGHT/2 + "px";
+        this.do_action_html.style.height = TURN_BUTTON_HEIGHT + "px";
+        this.end_turn_html.style.height = TURN_BUTTON_HEIGHT + "px";
+        this.do_action_html.style.top = BOARD_PIXEL_HEIGHT/2+50 + "px";
+        this.end_turn_html.style.top = BOARD_PIXEL_HEIGHT/2+95+TURN_BUTTON_HEIGHT + "px";
+        this.do_action_html.setAttribute("onclick", OBJECT_NAME + ".do_all_actions()")
+        this.end_turn_html.setAttribute("onclick", OBJECT_NAME + ".end_turn()")
         this.info.style.display = "none";
         let map = [];
         for (let i = 0; i < BOARD_HEIGHT; i++)
@@ -387,4 +399,4 @@ class Game
 let player = new Player("blue", "dodgerblue");
 let player2 = new Player("red", "pink");
 let player3 = new Player("forestgreen", "lawngreen")
-let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3], "Info", 400, "game");
+let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", 100);
