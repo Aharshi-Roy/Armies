@@ -395,7 +395,7 @@ class Game
                 }
             }
         }
-        if (this.selected_tile[0] != -1 && this.selected_tile[1] !=-1)
+        if (this.selected_tile[0] != -1 && this.selected_tile[1] !=-1 && this.get_selected_tile().player != -1)
         {
             this.info.style.display = "block";
             let unit_type = this.get_selected_tile().unit_type
