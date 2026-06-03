@@ -73,6 +73,12 @@ class Cell
     {
         this.action_state = "used";
     }
+    return_border_color()
+    {
+        if (this.action_state == "unused") return "black";
+        else if (this.action_state == "being used") return "lime";
+        else if (this.action_state == "used") return "tomato";
+    }
 }
 class Action
 {
@@ -177,6 +183,7 @@ class Action
                 this.cells[1].remove_unit(false);
                 if (this.cells[0].strength > 8) this.cells[0].strength = 8;
                 if (this.cells[1].strength > 8) this.cells[1].strength = 8;
+                this.cells[0].use();
                 clearInterval(battle_timer);
             }
             this.game.render();
@@ -361,8 +368,19 @@ class Game
         else if (type == "ore deposit") return "grey";
         else return "black";
     }
+    update_action_state()
+    {
+        for (let action of this.actions)
+        {
+            for (let cell of action.cells)
+            {
+                cell.action_state = "being used";
+            }
+        }
+    }
     render()
     {
+        this.update_action_state();
         let UNIT_RATIO  = [.8, .2];
         this.html_board.innerHTML = ""
         for (let i = 0; i < this.BOARD_HEIGHT; i++)
@@ -380,7 +398,7 @@ class Game
                         unit.style.left = (this.BOARD_CELL_PIXEL_WIDTH*j+this.BOARD_CELL_PIXEL_WIDTH*.25) + "px";
                         unit.style.borderLeft = (this.BOARD_CELL_PIXEL_HEIGHT*.5)/2 + "px solid transparent";
                         unit.style.borderRight = (this.BOARD_CELL_PIXEL_HEIGHT*.5)/2 + "px solid transparent";
-                        unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5) + "px solid black";
+                        unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5) + "px solid " + this.board[i][j].return_border_color();
                         let inner_unit = document.createElement("div")
                         inner_unit.classList.add("navy")
                         inner_unit.style.top = this.BOARD_CELL_PIXEL_HEIGHT*UNIT_RATIO[1]/3 + "px";
@@ -410,7 +428,7 @@ class Game
                         unit.style.left = (this.BOARD_CELL_PIXEL_WIDTH*j) + "px";
                         unit.style.height = (this.BOARD_CELL_PIXEL_HEIGHT)*UNIT_RATIO[0] + "px";
                         unit.style.width = (this.BOARD_CELL_PIXEL_WIDTH)*UNIT_RATIO[0] + "px";
-                        unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
+                        unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid " + this.board[i][j].return_border_color();
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
                         if (this.selected_tile[0] == i && this.selected_tile[1] == j)
                         {
@@ -434,7 +452,7 @@ class Game
                         unit.style.left = (this.BOARD_CELL_PIXEL_WIDTH*j+this.BOARD_CELL_PIXEL_WIDTH*.25)-((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*(UNIT_RATIO[1]/2) + "px";
                         unit.style.height = (this.BOARD_CELL_PIXEL_HEIGHT*.5)*UNIT_RATIO[0] + "px";
                         unit.style.width = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px";
-                        unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid black";
+                        unit.style.border = ((this.BOARD_CELL_PIXEL_HEIGHT*.5+this.BOARD_CELL_PIXEL_WIDTH*.5)/2)*UNIT_RATIO[1] + "px solid "+ this.board[i][j].return_border_color();
                         unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
                         if (this.board[i][j].unit_type == "city") unit.innerHTML = "<p class='strength' style='rotate: -45deg;'>" + this.board[i][j].strength + "</p class='strength'>";
                         else if (this.return_unit(this.board[i][j].unit_type).holds_strength) unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
