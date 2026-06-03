@@ -333,6 +333,10 @@ class Game
         {
             if (option == 1) map_string = "slllswllwwwwlwwwwllwsllls";
         }
+        else if (x == 10 && y == 10 && players == 4)
+        {
+            if (option == 1) map_string = "sllllllwwwlllllswwwwllswwwwwwsllwwwwwwllwswwslwsllwwwwlllllllwwwwlommlswwwsllmollwwlllmlllwwslllllls";
+        }
         for (let i = 0; i < this.BOARD_HEIGHT; i++)
         {
             for (let j = 0; j < this.BOARD_WIDTH; j++)
