@@ -97,6 +97,7 @@ class Action
         else if (this.action_name == "move") return this.move();
         else if (this.action_name == "build") return this.build();
         else if (this.action_name == "battle") return this.battle();
+        else if (this.action_name == "trade") return this.trade();
     }
     produce()
     {
@@ -182,6 +183,35 @@ class Action
         }, 1000);
         console.log("Func Finished");
     }
+    trade()
+    {
+        // First cell is giver, second cell recieves, and third is trader location, fourth is trader destination, and extra info is amount of strength being traded
+        let extra_amount = 0;
+        if (this.cells[0].is_ore_deposit()) extra_amount++;
+        if (this.cells[1].is_ore_deposit()) extra_amount++;
+        extra_amount += this.extra_info[1]; 
+        let return1 = this.cells[0].change_strength(-this.extra_info[0]-extra_amount, true);
+        let return2 = this.cells[1].change_strength(this.extra_info[1], true);
+        if (return1 == "clear" && return2 == "clear")
+        {
+            let unit = this.cells[2].save_unit();
+            this.cells[2].remove_unit(false);
+            this.cells[3].load_unit(unit);
+            return "clear";
+        }
+        else
+        {
+            if (return1 == "clear")
+            {
+                this.cells[0].change_strength(this.extra_info+extra_amount, true);
+            }
+            if (return2 == "clear")
+            {
+                this.cells[1].change_strength(-this.extra_info, true);
+            }
+            return "invalid";
+        }
+    }
 }
 class Game
 {
@@ -230,8 +260,10 @@ class Game
         this.board = map;
         let action = new Action([this.board[6][2], this.board[5][2]], "battle", "none", this);
         let action2 = new Action([this.board[4][4], this.board[4][5]], "build", ["navy", 5, 2], this);
+        let action3 = new Action([this.board[0][0], this.board[0][6], this.board[0][1], this.board[0][5]], "trade", [2, 5], this);
         this.actions.push(action);
         this.actions.push(action2);
+        this.actions.push(action3);
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
@@ -243,6 +275,8 @@ class Game
         this.get_tile([0, 0]).place_unit("city", 8, 2, false);
         this.get_tile([4, 4]).place_unit("city", 8, 2, false);
         this.get_tile([4, 3]).place_unit("navy", 1, 2, false);
+        this.get_tile([0, 6]).place_unit("city", 1, 2, false);
+        this.get_tile([0, 1]).place_unit("trader", 0, 2, false);
         this.unit_array = 
         [
             new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
