@@ -29,6 +29,11 @@ class Cell
         this.player = player;
         this.action_state = "unused";
     }
+    is_ore_deposit()
+    {
+        if (this.land_type == "ore deposit") return true;
+        return false;
+    }
     save_unit()
     {
         return [this.unit_type, this.strength, this.player];
@@ -105,7 +110,10 @@ class Action
     transact()
     {
         // First Cell is giver, second cell is give to
-        let return1 = this.cells[0].change_strength(-this.extra_info, true);
+        let extra_amount = 0;
+        if (this.cells[0].is_ore_deposit()) extra_amount++; 
+        if (this.cells[1].is_ore_deposit()) extra_amount++; 
+        let return1 = this.cells[0].change_strength(-this.extra_info-extra_amount, true);
         let return2 = this.cells[1].change_strength(this.extra_info, true);
         if (return1 == "clear" && return2 == "clear")
         {
@@ -115,7 +123,7 @@ class Action
         {
             if (return1 == "clear")
             {
-                this.cells[0].change_strength(this.extra_info, true);
+                this.cells[0].change_strength(this.extra_info+extra_amount, true);
             }
             if (return2 == "clear")
             {
@@ -134,7 +142,10 @@ class Action
     }
     build()
     {
-        if (this.cells[0].change_strength(-this.extra_info[1], true) == "clear")
+        let extra_amount = 0;
+        if (this.cells[0].is_ore_deposit()) extra_amount++; 
+        if (this.cells[1].is_ore_deposit()) extra_amount++; 
+        if (this.cells[0].change_strength(-this.extra_info[1]-extra_amount, true) == "clear")
         {
             this.cells[1].place_unit(this.extra_info[0], 1, this.extra_info[2], true);
             return "clear";
@@ -143,6 +154,8 @@ class Action
     }
     battle()
     {
+        if (this.cells[0].land_type == "ore deposit") this.cells[0].strength += 2;
+        if (this.cells[1].land_type == "ore deposit") this.cells[1].strength += 2;
         let battle_timer = setInterval(() => 
         {
             let random_number = Math.floor(Math.random() * 6);
@@ -154,11 +167,15 @@ class Action
             if (this.cells[0].strength <= 0)
             {
                 this.cells[0].remove_unit(false)
+                if (this.cells[0].strength > 8) this.cells[0].strength = 8;
+                if (this.cells[1].strength > 8) this.cells[1].strength = 8;
                 clearInterval(battle_timer);
             }
             if (this.cells[1].strength <= 0)
             {
                 this.cells[1].remove_unit(false);
+                if (this.cells[0].strength > 8) this.cells[0].strength = 8;
+                if (this.cells[1].strength > 8) this.cells[1].strength = 8;
                 clearInterval(battle_timer);
             }
             this.game.render();
@@ -212,7 +229,9 @@ class Game
         }
         this.board = map;
         let action = new Action([this.board[6][2], this.board[5][2]], "battle", "none", this);
+        let action2 = new Action([this.board[4][4], this.board[4][5]], "build", ["navy", 5, 2], this);
         this.actions.push(action);
+        this.actions.push(action2);
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
@@ -222,6 +241,8 @@ class Game
         this.get_tile([6, 1]).place_unit("blockade", 3, 0, false);
         this.get_tile([6, 2]).place_unit("city", 5, 0, false);
         this.get_tile([0, 0]).place_unit("city", 8, 2, false);
+        this.get_tile([4, 4]).place_unit("city", 8, 2, false);
+        this.get_tile([4, 3]).place_unit("navy", 1, 2, false);
         this.unit_array = 
         [
             new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
@@ -299,8 +320,8 @@ class Game
         else if (type == "water") return "deepskyblue";
         else if (type == "soil") return "red";
         else if (type == "mountain") return "white";
-        else if (type == "ore deposit") return "black";
-        else return "grey";
+        else if (type == "ore deposit") return "grey";
+        else return "black";
     }
     render()
     {
