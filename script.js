@@ -304,6 +304,7 @@ class Game
                 cell.action_state = "unused";
             }
         }
+        this.actions = [];
         this.selected_tile = [-1, -1]
         this.update_turn();
         this.render();
