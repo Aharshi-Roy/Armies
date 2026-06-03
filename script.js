@@ -204,6 +204,7 @@ class Action
             let unit = this.cells[2].save_unit();
             this.cells[2].remove_unit(false);
             this.cells[3].load_unit(unit);
+            this.cells[3].use();
             return "clear";
         }
         else
