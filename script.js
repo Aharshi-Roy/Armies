@@ -31,6 +31,7 @@ class Cell
 
         // Only used in one algorithm
         this.visited = false;
+        this.claimed = false;
     }
     is_ore_deposit()
     {
@@ -329,20 +330,39 @@ class Game
     }
     get_surrounding_cells(distance, starting, available_tiles)
     {
-        this.board[starting[0]][starting[1]].visited = true;
-        if (distance == 0) return [starting];
-        let surrounding_cells = [];
-        for (let i = 0; i < 4; i++)
+        let current_wave = [starting];
+        let past_wave = [];
+        
+        this.get_tile(starting).visited = true;
+
+        for (let current_distance = 0; current_distance < distance; current_distance++)
         {
-            let direction = this.give_direction(i);
-            let next_cell = this.cell_in_direction(direction, starting);
-            if (next_cell == null) continue;
-            if (!available_tiles.includes(this.board[next_cell[0]][next_cell[1]].land_type)) continue;
-            if (this.board[next_cell[0]][next_cell[1]].visited) continue;
-            surrounding_cells = surrounding_cells.concat(this.get_surrounding_cells(distance-1, next_cell, available_tiles));
+            let next_wave = [];
+            for (let cell of current_wave)
+            {
+                for (let i = 0; i < 4; i++)
+                {
+                    let direction = this.give_direction(i);
+                    let next_cell = this.cell_in_direction(direction, cell);
+                    if (next_cell == null) continue;
+
+                    let tile = this.get_tile(next_cell);
+                    if (!available_tiles.includes(tile.land_type) || tile.visited) continue;
+
+                    tile.visited = true;
+                    next_wave.push(next_cell);
+                }
+            }
+            past_wave = past_wave.concat(current_wave);
+            current_wave = next_wave;
         }
-        surrounding_cells.push(starting);
-        return surrounding_cells;
+        past_wave = past_wave.concat(current_wave);
+        for (let cell of past_wave)
+        {
+            this.get_tile(cell).visited = true;
+        }
+
+        return past_wave;
     }
     get_tile(coords)
     {
@@ -550,6 +570,6 @@ let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3],
 run_tests();
 function run_tests()
 {
-    console.log(game.get_surrounding_cells(3, [1, 4], ["land", "soil"]))
+    console.log(game.get_surrounding_cells(5, [0, 6], ["land", "soil", "water", "mountain", "ore deposit"]))
     game.render();
 }
