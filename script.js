@@ -28,6 +28,9 @@ class Cell
         this.strength = strength;
         this.player = player;
         this.action_state = "unused";
+
+        // Only used in one algorithm
+        this.visited = false;
     }
     is_ore_deposit()
     {
@@ -309,6 +312,38 @@ class Game
         this.update_turn();
         this.render();
     }
+    give_direction(num)
+    {
+        if (num == 0) return "up";
+        else if (num == 1) return "right";
+        else if (num == 2) return "down";
+        else if (num == 3) return "left";
+    }
+    cell_in_direction(direction, cell)
+    {
+        if (direction == "up" && cell[0] > 0) return [cell[0]-1, cell[1]];
+        else if (direction == "right" && cell[1] < this.BOARD_WIDTH-1) return [cell[0], cell[1]+1];
+        else if (direction == "down" && cell[0] < this.BOARD_HEIGHT-1) return [cell[0]+1, cell[1]];
+        else if (direction == "left" && cell[1] > 0) return [cell[0], cell[1]-1];
+        else return null;
+    }
+    get_surrounding_cells(distance, starting, available_tiles)
+    {
+        this.board[starting[0]][starting[1]].visited = true;
+        if (distance == 0) return [starting];
+        let surrounding_cells = [];
+        for (let i = 0; i < 4; i++)
+        {
+            let direction = this.give_direction(i);
+            let next_cell = this.cell_in_direction(direction, starting);
+            if (next_cell == null) continue;
+            if (!available_tiles.includes(this.board[next_cell[0]][next_cell[1]].land_type)) continue;
+            if (this.board[next_cell[0]][next_cell[1]].visited) continue;
+            surrounding_cells = surrounding_cells.concat(this.get_surrounding_cells(distance-1, next_cell, available_tiles));
+        }
+        surrounding_cells.push(starting);
+        return surrounding_cells;
+    }
     get_tile(coords)
     {
         return this.board[coords[0]][coords[1]];
@@ -390,6 +425,10 @@ class Game
             for (let j = 0; j < this.BOARD_WIDTH; j++)
             {
                 this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + ";' id='" + i + "-" + j + "'></div>";
+                if (this.board[i][j].visited == true)
+                {
+                    document.getElementById(i + "-" + j).style.backgroundColor = "purple";
+                }
                 if (this.board[i][j].player != -1)
                 {
                     if (this.board[i][j].unit_type == "navy")
@@ -507,3 +546,10 @@ let player = new Player("blue", "dodgerblue");
 let player2 = new Player("red", "pink");
 let player3 = new Player("forestgreen", "lawngreen")
 let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", 100);
+
+run_tests();
+function run_tests()
+{
+    console.log(game.get_surrounding_cells(3, [1, 4], ["land", "soil"]))
+    game.render();
+}
