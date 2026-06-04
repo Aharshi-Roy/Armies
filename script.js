@@ -180,6 +180,7 @@ class Action
                 this.cells[0].remove_unit(false)
                 if (this.cells[0].strength > 8) this.cells[0].strength = 8;
                 if (this.cells[1].strength > 8) this.cells[1].strength = 8;
+                this.cells[1].action_state = "unused";
                 clearInterval(battle_timer);
             }
             if (this.cells[1].strength <= 0)
@@ -237,6 +238,8 @@ class Game
         this.BOARD_CELL_PIXEL_WIDTH = BOARD_PIXEL_WIDTH/BOARD_WIDTH;
         this.BOARD_CELL_PIXEL_HEIGHT = BOARD_PIXEL_HEIGHT/BOARD_HEIGHT;
         this.OBJECT_NAME = OBJECT_NAME;
+        this.INFO_WIDTH = INFO_WIDTH;
+        this.TURN_BUTTON_HEIGHT = TURN_BUTTON_HEIGHT;
         this.selected_tile = [-1, -1];
         this.actions = [];
         this.player_amount = player_amount;
@@ -294,8 +297,8 @@ class Game
             new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
             new Unit("army", true, 4, ["land", "soil"], ["blockade", "city"], ["transact", "build", "battle", "trade"]),
             new Unit("city", true, 5, ["soil", "ore deposit"], ["army", "navy", "trader", "blockade", "city"], ["produce", "transact", "build", "battle", "trade"]),
-            new Unit("blockade", false, 4, ["land"], [], ["trade"]),
-            new Unit("trader", false, 3, ["land"], [], ["remove"])
+            new Unit("blockade", false, 4, ["land"], [], ["remove"]),
+            new Unit("trader", false, 3, ["land"], [], ["trade"])
         ];
         this.render();
     }
@@ -539,6 +542,20 @@ class Game
             let unit_type = this.get_selected_tile().unit_type
             unit_type = unit_type[0].toUpperCase() + unit_type.slice(1);
             this.info.innerHTML = "<h1>" + unit_type + "</h1>";
+            if (this.get_selected_tile().action_state != "used")
+            {
+                for (let action of this.return_unit(this.get_selected_tile().unit_type).actions)
+                {
+                    let button = document.createElement("button");
+                    button.innerHTML = action;
+                    button.classList.add("ActionButton");
+                    button.style.width = this.INFO_WIDTH + "px";
+                    button.style.height = this.BOARD_PIXEL_HEIGHT/20 + "px";
+                    button.setAttribute("onclick", this.OBJECT_NAME +".ask_action('" + action + "')")
+                    this.info.append(button);
+                }
+            }
+            
         }
         else
         {
@@ -560,6 +577,23 @@ class Game
         this.actions = [];
         this.render();
     }
+    ask_action(action_name)
+    {
+        console.log("Here");
+        if (action_name == "produce")
+        {
+            console.log("Producing");
+            let action = new Action([this.get_selected_tile()], "produce", "none", this);
+            this.actions.push(action);
+        }
+        else if (action_name == "remove")
+        {
+            console.log("removing");
+            let action = new Action([this.get_selected_tile()], "remove", "none", this);
+            this.actions.push(action);
+        }
+        this.render();
+    }
 }
 
 let player = new Player("blue", "dodgerblue");
@@ -567,7 +601,7 @@ let player2 = new Player("red", "pink");
 let player3 = new Player("forestgreen", "lawngreen")
 let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", 100);
 
-run_tests();
+//run_tests();
 function run_tests()
 {
     console.log(game.get_surrounding_cells(5, [0, 6], ["land", "soil", "water", "mountain", "ore deposit"]))
