@@ -554,6 +554,16 @@ class Game
                     button.setAttribute("onclick", this.OBJECT_NAME +".ask_action('" + action + "')")
                     this.info.append(button);
                 }
+                if (this.get_selected_tile().action_state == "being used")
+                {
+                    let button = document.createElement("button");
+                    button.innerHTML = "Cancel Action";
+                    button.classList.add("CancelActionButton");
+                    button.style.width = this.INFO_WIDTH + "px";
+                    button.style.height = this.BOARD_PIXEL_HEIGHT/20 + "px";
+                    button.setAttribute("onclick", this.OBJECT_NAME +".ask_action('cancel action')")
+                    this.info.append(button);
+                }
             }
             
         }
@@ -577,9 +587,34 @@ class Game
         this.actions = [];
         this.render();
     }
+    search_for_action(specific_cell)
+    {
+        for (let i = 0; i < this.actions.length; i++)
+        {
+            let action = this.actions[i];
+            for (let cell of action.cells)
+            {
+                if (cell === specific_cell) return i;
+            }
+        }
+        return null;
+    }
     ask_action(action_name)
     {
         console.log("Here");
+        if (this.get_selected_tile().action_state == "being used")
+        {
+            let old_action = this.search_for_action(this.get_selected_tile());
+            if (old_action !== null)
+            {
+                for (let cell of this.actions[old_action].cells)
+                {
+                    cell.action_state = "unused";
+                }
+                this.actions.splice(old_action, 1);
+                this.render();
+            }
+        }
         if (action_name == "produce")
         {
             console.log("Producing");
