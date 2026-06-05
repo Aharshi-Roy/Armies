@@ -105,3 +105,15 @@ h1
 {
     background-color: forestgreen;
 }
+
+.CancelActionButton
+{
+    background-color: salmon;
+    border: 5px solid black;
+    border-radius: 20px;
+}
+
+.CancelActionButton:hover
+{
+    background-color: red;
+}
