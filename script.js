@@ -193,7 +193,6 @@ class Action
             }
             this.game.render();
         }, 1000);
-        console.log("Func Finished");
     }
     trade()
     {
@@ -263,6 +262,8 @@ class Game
         this.do_action_html.setAttribute("onclick", OBJECT_NAME + ".do_all_actions()")
         this.end_turn_html.setAttribute("onclick", OBJECT_NAME + ".end_turn()")
         this.info.style.display = "none";
+        this.selectable_tiles = [];
+        this.action_in_progress;
         let map = [];
         for (let i = 0; i < BOARD_HEIGHT; i++)
         {
@@ -294,13 +295,18 @@ class Game
         this.get_tile([0, 1]).place_unit("trader", 0, 2, false);
         this.unit_array = 
         [
-            new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade"]),
-            new Unit("army", true, 4, ["land", "soil"], ["blockade", "city"], ["transact", "build", "battle", "trade"]),
+            new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade", "move"]),
+            new Unit("army", true, 4, ["land", "soil"], ["blockade", "city"], ["transact", "build", "battle", "trade", "move"]),
             new Unit("city", true, 5, ["soil", "ore deposit"], ["army", "navy", "trader", "blockade", "city"], ["produce", "transact", "build", "battle", "trade"]),
             new Unit("blockade", false, 4, ["land"], [], ["remove"]),
             new Unit("trader", false, 3, ["land"], [], ["trade"])
         ];
         this.render();
+    }
+    reset_ui()
+    {
+        this.selectable_tiles = [];
+        this.action_in_progress = "none";
     }
     end_turn()
     {
@@ -311,6 +317,7 @@ class Game
                 cell.action_state = "unused";
             }
         }
+        this.reset_ui();
         this.actions = [];
         this.selected_tile = [-1, -1]
         this.update_turn();
@@ -331,7 +338,7 @@ class Game
         else if (direction == "left" && cell[1] > 0) return [cell[0], cell[1]-1];
         else return null;
     }
-    get_surrounding_cells(distance, starting, available_tiles)
+    get_surrounding_cells(distance, starting, available_tiles, exclude_staring)
     {
         let current_wave = [starting];
         let past_wave = [];
@@ -362,9 +369,16 @@ class Game
         past_wave = past_wave.concat(current_wave);
         for (let cell of past_wave)
         {
-            this.get_tile(cell).visited = true;
+            this.get_tile(cell).visited = false;
         }
-
+        if (exclude_staring)
+        {
+            let starting_index = past_wave.indexOf(starting);
+            if (starting != -1)
+            {
+                past_wave.splice(starting_index, 1);
+            }
+        }
         return past_wave;
     }
     get_tile(coords)
@@ -448,10 +462,7 @@ class Game
             for (let j = 0; j < this.BOARD_WIDTH; j++)
             {
                 this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: " + this.land_type_to_color(this.board[i][j].land_type) + ";' id='" + i + "-" + j + "'></div>";
-                if (this.board[i][j].visited == true)
-                {
-                    document.getElementById(i + "-" + j).style.backgroundColor = "purple";
-                }
+                this.html_board.innerHTML += "<div class='Cell' style='top: " + this.BOARD_CELL_PIXEL_HEIGHT*i + "px; left: " + this.BOARD_CELL_PIXEL_WIDTH*j +"px; height: " + (this.BOARD_CELL_PIXEL_HEIGHT-2) +"px; width: "+ (this.BOARD_CELL_PIXEL_WIDTH-2) + "px; background-color: rgba(0, 0, 0, 0);' id='" + i + "-" + j + "-tint'></div>";
                 if (this.board[i][j].player != -1)
                 {
                     if (this.board[i][j].unit_type == "navy")
@@ -536,6 +547,14 @@ class Game
                 }
             }
         }
+        for (let tile of this.selectable_tiles)
+        {
+            let real_tile = document.getElementById(tile[0] + "-" + tile[1] + "-tint");
+            real_tile.style.backgroundColor = "rgba(0, 0, 0, .25)";
+            real_tile.setAttribute('onmouseenter', "this.style.backgroundColor = 'rgba(0, 0, 0, .5)'");
+            real_tile.setAttribute('onmouseleave', "this.style.backgroundColor = 'rgba(0, 0, 0, .25)'");
+            real_tile.setAttribute('onclick', this.OBJECT_NAME + ".tile_selected(" + tile[0] + ", " + tile[1] + ")");
+        }
         if (this.selected_tile[0] != -1 && this.selected_tile[1] !=-1 && this.get_selected_tile().player != -1)
         {
             this.info.style.display = "block";
@@ -576,6 +595,7 @@ class Game
     {
         if (this.selected_tile[0] != i || this.selected_tile[1] != j) this.selected_tile = [i, j];
         else this.selected_tile = [-1, -1];
+        this.selectable_tiles = [];
         this.render();
     }
     do_all_actions()
@@ -584,6 +604,7 @@ class Game
         {
             console.log(action.do_action());
         }
+        this.reset_ui();
         this.actions = [];
         this.render();
     }
@@ -599,9 +620,20 @@ class Game
         }
         return null;
     }
-    ask_action(action_name)
+    tile_selected(i, j)
     {
         console.log("Here");
+        let tile = [i, j];
+        if (this.action_in_progress == "move")
+        {
+            let action = new Action([this.get_selected_tile(), this.get_tile(tile)], "move", "none", this);
+            this.actions.push(action);
+            this.reset_ui();
+            this.render();
+        }
+    }
+    ask_action(action_name)
+    {
         if (this.get_selected_tile().action_state == "being used")
         {
             let old_action = this.search_for_action(this.get_selected_tile());
@@ -617,15 +649,28 @@ class Game
         }
         if (action_name == "produce")
         {
-            console.log("Producing");
             let action = new Action([this.get_selected_tile()], "produce", "none", this);
             this.actions.push(action);
         }
         else if (action_name == "remove")
         {
-            console.log("removing");
             let action = new Action([this.get_selected_tile()], "remove", "none", this);
             this.actions.push(action);
+        }
+        else if (action_name == "move")
+        {
+            let tiles = this.get_surrounding_cells(1, this.selected_tile, this.return_unit(this.get_selected_tile().unit_type).available_tiles, true);
+            for (let i = 0; i < tiles.length; i++)
+            {
+                let tile = tiles[i];
+                if (this.get_tile(tile).unit_type != "none")
+                {
+                    tiles.splice(i, 1);
+                    if (tiles.length > 0) i--;
+                }
+            }
+            this.action_in_progress = action_name;
+            this.selectable_tiles = tiles;
         }
         this.render();
     }
@@ -636,9 +681,9 @@ let player2 = new Player("red", "pink");
 let player3 = new Player("forestgreen", "lawngreen")
 let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", 100);
 
-//run_tests();
+run_tests();
 function run_tests()
 {
-    console.log(game.get_surrounding_cells(5, [0, 6], ["land", "soil", "water", "mountain", "ore deposit"]))
+    console.log(game.get_surrounding_cells(6, [3, 3], ["land", "soil", "water", "mountain", "ore deposit"], true))
     game.render();
 }
