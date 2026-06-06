@@ -597,6 +597,10 @@ class Game
         for (let action of this.actions)
         {
             console.log(action.do_action());
+            for (let cell of action.cells)
+            {
+                if (cell.action_state == "being used") cell.action_state = "unused";
+            }
         }
         this.reset_ui();
         this.actions = [];
