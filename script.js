@@ -316,6 +316,7 @@ class Game
         this.get_tile([4, 3]).place_unit("navy", 1, 2, false);
         this.get_tile([0, 6]).place_unit("city", 1, 2, false);
         this.get_tile([0, 1]).place_unit("trader", 0, 2, false);
+        this.action_extra = "";
         this.unit_array = 
         [
             new Unit("navy", true, 5, ["water"], ["army", "blockade", "city"], ["transact", "build", "battle", "trade", "move"]),
@@ -331,6 +332,7 @@ class Game
         this.selectable_tiles = [];
         this.action_in_progress = "none";
         this.action_info = [];
+        this.action_extra = "";
         for (let row of this.board)
         {
             for (let cell of row)
@@ -702,6 +704,13 @@ class Game
                 }
             }
         }
+        else if (this.action_in_progress == "build")
+        {
+            let action = new Action([this.get_selected_tile(), this.get_tile(tile)], "build", [this.action_extra, this.return_unit(this.action_extra).cost, this.get_selected_tile().player], this);
+            this.actions.push(action);
+            this.reset_ui();
+            this.render();
+        }
     }
     ask_action(action_name)
     {
@@ -779,6 +788,50 @@ class Game
                 }
             }
             this.action_in_progress = "transact";
+        }
+        else if (action_name == "build")
+        {
+            let available_to_build = this.return_unit(this.get_selected_tile().unit_type).able_build;
+            let text = "";
+            for (let i = 0; i < available_to_build.length; i++)
+            {
+                text += "\n";
+                text += String(i+1);
+                text += ". ";
+                text += available_to_build[i];
+            }
+            let unit_to_build = prompt("What do you want to build? Write the unit" + text);
+            if (available_to_build.includes(unit_to_build))
+            {
+                let tiles = [];
+                if (unit_to_build != "blockade") tiles = this.get_surrounding_cells(1, this.selected_tile, this.return_unit(unit_to_build).available_tiles, true);
+                else
+                {
+                    for (let i = 0; i < this.BOARD_HEIGHT; i++)
+                    {
+                        for (let j = 0; j < this.BOARD_WIDTH; j++)
+                        {
+                            if (this.return_unit("blockade").available_tiles.includes(this.get_tile([i, j]).land_type))
+                            {
+                                tiles.push([i, j]);
+                            }
+                        }
+                    }
+                }
+                console.log(tiles);
+                for (let i = 0; i < tiles.length; i++)
+                {
+                    let tile = tiles[i];
+                    if (this.get_tile(tile).unit_type != "none")
+                    {
+                        tiles.splice(i, 1);
+                        if (tiles.length > 0) i--;
+                    }
+                }
+                this.action_in_progress = "build";
+                this.action_extra = unit_to_build;
+                this.selectable_tiles = tiles;
+            }
         }
         this.render();
     }
