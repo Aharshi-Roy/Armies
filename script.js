@@ -31,7 +31,6 @@ class Cell
 
         // Only used in one algorithm
         this.visited = false;
-        this.claimed = false;
     }
     is_ore_deposit()
     {
@@ -79,7 +78,8 @@ class Cell
     }
     return_border_color()
     {
-        if (this.action_state == "unused") return "black";
+        if (this.visited) return "white";
+        else if (this.action_state == "unused") return "black";
         else if (this.action_state == "being used") return "lime";
         else if (this.action_state == "used") return "tomato";
     }
@@ -167,32 +167,51 @@ class Action
     {
         if (this.cells[0].land_type == "ore deposit") this.cells[0].strength += 2;
         if (this.cells[1].land_type == "ore deposit") this.cells[1].strength += 2;
-        let battle_timer = setInterval(() => 
+        if (this.cells[1].unit_type == "trader" || this.cells[1].unit_type == "blockade")
         {
-            let random_number = Math.floor(Math.random() * 6);
-            if (random_number == 0) this.cells[0].strength -= 2;
-            if (random_number == 1 || random_number == 2) this.cells[0].strength--;
-            if (random_number == 3 || random_number == 4) this.cells[1].strength--;
-            if (random_number == 5) this.cells[1].strength -= 2;
-
-            if (this.cells[0].strength <= 0)
+            let return1 = this.cells[0].change_strength(-2, false);
+            if (return1 != "clear") return "invalid";
+            else
             {
-                this.cells[0].remove_unit(false)
-                if (this.cells[0].strength > 8) this.cells[0].strength = 8;
-                if (this.cells[1].strength > 8) this.cells[1].strength = 8;
-                this.cells[1].action_state = "unused";
-                clearInterval(battle_timer);
-            }
-            if (this.cells[1].strength <= 0)
-            {
-                this.cells[1].remove_unit(false);
-                if (this.cells[0].strength > 8) this.cells[0].strength = 8;
-                if (this.cells[1].strength > 8) this.cells[1].strength = 8;
                 this.cells[0].use();
-                clearInterval(battle_timer);
+                if (this.cells[0].strength > 8) this.cells[0].strength = 8;
+                if (this.cells[1].strength > 8) this.cells[1].strength = 8;
+                this.cells[1].remove_unit(false);
+                return "clear";
             }
-            this.game.render();
-        }, 1000);
+        }
+        else
+        {
+            let battle_timer = setInterval(() => 
+            {
+                game.battling = true;
+                let random_number = Math.floor(Math.random() * 6);
+                if (random_number == 0) this.cells[0].strength -= 2;
+                if (random_number == 1 || random_number == 2) this.cells[0].strength--;
+                if (random_number == 3 || random_number == 4) this.cells[1].strength--;
+                if (random_number == 5) this.cells[1].strength -= 2;
+
+                if (this.cells[0].strength <= 0)
+                {
+                    this.cells[0].remove_unit(false)
+                    if (this.cells[0].strength > 8) this.cells[0].strength = 8;
+                    if (this.cells[1].strength > 8) this.cells[1].strength = 8;
+                    this.cells[1].action_state = "unused";
+                    clearInterval(battle_timer);
+                    game.battling = false;
+                }
+                if (this.cells[1].strength <= 0)
+                {
+                    this.cells[1].remove_unit(false);
+                    if (this.cells[0].strength > 8) this.cells[0].strength = 8;
+                    if (this.cells[1].strength > 8) this.cells[1].strength = 8;
+                    this.cells[0].use();
+                    clearInterval(battle_timer);
+                    game.battling = false;
+                }
+                this.game.render();
+            }, 1000);
+        }
     }
     trade()
     {
@@ -264,6 +283,7 @@ class Game
         this.info.style.display = "none";
         this.selectable_tiles = [];
         this.action_in_progress;
+        this.battling = false;
         let map = [];
         for (let i = 0; i < BOARD_HEIGHT; i++)
         {
@@ -278,7 +298,7 @@ class Game
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
         this.get_tile([5, 2]).place_unit("navy", 3, 1, false);
-        this.get_tile([5, 1]).place_unit("army", 5, 1, false);
+        this.get_tile([5, 1]).place_unit("army", 1, 1, false);
         this.get_tile([5, 0]).place_unit("trader", 0, 0, false);
         this.get_tile([6, 1]).place_unit("blockade", 3, 0, false);
         this.get_tile([6, 2]).place_unit("city", 5, 0, false);
@@ -301,6 +321,13 @@ class Game
     {
         this.selectable_tiles = [];
         this.action_in_progress = "none";
+        for (let row of this.board)
+        {
+            for (let cell of row)
+            {
+                cell.visited = false;
+            }
+        }
     }
     end_turn()
     {
@@ -480,12 +507,13 @@ class Game
                         }
                         else inner_unit.style.borderBottom = (this.BOARD_CELL_PIXEL_WIDTH*.5)*UNIT_RATIO[0] + "px solid " + this.player_array[this.board[i][j].player].color;
                         inner_unit.innerHTML = "<p class='strength'>" + this.board[i][j].strength + "<p class='strength'>";
-                        if (this.player_turn == this.board[i][j].player && (this.selected_tile[0] != i || this.selected_tile[1] != j))
+                        if ((this.player_turn == this.board[i][j].player || this.board[i][j].visited) && (this.selected_tile[0] != i || this.selected_tile[1] != j))
                         {
                             inner_unit.setAttribute('onmouseenter', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                             inner_unit.setAttribute('onmouseleave', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
                         if (this.player_turn == this.board[i][j].player) inner_unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
+                        if (this.action_in_progress == "battle" && this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
                         unit.append(inner_unit);
                         this.html_board.append(unit);
                     }
@@ -504,12 +532,13 @@ class Game
                             unit.style.backgroundColor = this.player_array[this.board[i][j].player].hover_color;
                         }
                         else unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
-                        if (this.player_turn == this.board[i][j].player && (this.selected_tile[0] != i || this.selected_tile[1] != j))
+                        if ((this.player_turn == this.board[i][j].player || this.board[i][j].visited) && (this.selected_tile[0] != i || this.selected_tile[1] != j))
                         {
                             unit.setAttribute('onmouseenter', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                             unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
                         if (this.player_turn == this.board[i][j].player) unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
+                        if (this.action_in_progress == "battle" && this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
                         this.html_board.append(unit);
                     }
                     else
@@ -530,12 +559,13 @@ class Game
                             unit.style.backgroundColor = this.player_array[this.board[i][j].player].hover_color;
                         }
                         else unit.style.backgroundColor = this.player_array[this.board[i][j].player].color;
-                        if (this.player_turn == this.board[i][j].player && (this.selected_tile[0] != i || this.selected_tile[1] != j))
+                        if ((this.player_turn == this.board[i][j].player || this.board[i][j].visited) && (this.selected_tile[0] != i || this.selected_tile[1] != j))
                         {
                             unit.setAttribute('onmouseenter', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                             unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
                         if (this.player_turn == this.board[i][j].player) unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
+                        if (this.action_in_progress == "battle" && this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
                         this.html_board.append(unit);
                     }
                 }
@@ -549,7 +579,7 @@ class Game
             real_tile.setAttribute('onmouseleave', "this.style.backgroundColor = 'rgba(0, 0, 0, .25)'");
             real_tile.setAttribute('onclick', this.OBJECT_NAME + ".tile_selected(" + tile[0] + ", " + tile[1] + ")");
         }
-        if (this.selected_tile[0] != -1 && this.selected_tile[1] !=-1 && this.get_selected_tile().player != -1)
+        if (this.selected_tile[0] != -1 && this.selected_tile[1] !=-1 && this.get_selected_tile().player != -1 && !this.battling)
         {
             this.info.style.display = "block";
             let unit_type = this.get_selected_tile().unit_type
@@ -590,6 +620,13 @@ class Game
         if (this.selected_tile[0] != i || this.selected_tile[1] != j) this.selected_tile = [i, j];
         else this.selected_tile = [-1, -1];
         this.selectable_tiles = [];
+        for (let row of this.board)
+        {
+            for (let cell of row)
+            {
+                cell.visited = false;
+            }
+        }
         this.render();
     }
     do_all_actions()
@@ -599,7 +636,11 @@ class Game
             console.log(action.do_action());
             for (let cell of action.cells)
             {
-                if (cell.action_state == "being used") cell.action_state = "unused";
+                if (action.action_name == "battle")
+                {
+                    if (action.cells[1].unit_type == "trader" || action.cells[1].unit_type == "blockade") cell.action_state = "unused";
+                }
+                else if (cell.action_state == "being used") cell.action_state = "unused";
             }
         }
         this.reset_ui();
@@ -629,9 +670,17 @@ class Game
             this.reset_ui();
             this.render();
         }
+        else if (this.action_in_progress == "battle")
+        {
+            let action = new Action([this.get_selected_tile(), this.get_tile(tile)], "battle", "none", this);
+            this.actions.push(action);
+            this.reset_ui();
+            this.render();
+        }
     }
     ask_action(action_name)
     {
+        this.reset_ui();
         if (this.get_selected_tile().action_state == "being used")
         {
             let old_action = this.search_for_action(this.get_selected_tile());
@@ -669,6 +718,24 @@ class Game
             }
             this.action_in_progress = action_name;
             this.selectable_tiles = tiles;
+        }
+        else if (action_name == "battle")
+        {
+            let tiles = this.get_surrounding_cells(1, this.selected_tile, ["land", "soil", "water", "mountain", "ore deposit"], true);
+            for (let i = 0; i < tiles.length; i++)
+            {
+                let tile = tiles[i];
+                if (this.get_tile(tile).unit_type == "none" || this.get_selected_tile().player == this.get_tile(tile).player)
+                {
+                    tiles.splice(i, 1);
+                    if (tiles.length > 0) i--;
+                }
+                else
+                {
+                    this.get_tile(tile).visited = true;
+                }
+            }
+            this.action_in_progress = "battle";
         }
         this.render();
     }
