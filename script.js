@@ -274,12 +274,6 @@ class Game
             }
         }
         this.board = map;
-        let action = new Action([this.board[6][2], this.board[5][2]], "battle", "none", this);
-        let action2 = new Action([this.board[4][4], this.board[4][5]], "build", ["navy", 5, 2], this);
-        let action3 = new Action([this.board[0][0], this.board[0][6], this.board[0][1], this.board[0][5]], "trade", [2, 5], this);
-        this.actions.push(action);
-        this.actions.push(action2);
-        this.actions.push(action3);
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
         this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
