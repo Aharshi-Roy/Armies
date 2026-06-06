@@ -128,6 +128,8 @@ class Action
         let return2 = this.cells[1].change_strength(this.extra_info, true);
         if (return1 == "clear" && return2 == "clear")
         {
+            if (this.cells[0].strength == 0) this.cells[0].remove_unit(false);
+            if (this.cells[1].strength == 0) this.cells[1].remove_unit(false);
             return "clear";
         }
         else
@@ -135,10 +137,12 @@ class Action
             if (return1 == "clear")
             {
                 this.cells[0].change_strength(this.extra_info+extra_amount, true);
+                this.cells[0].action_state = "unused";
             }
             if (return2 == "clear")
             {
                 this.cells[1].change_strength(-this.extra_info, true);
+                this.cells[1].action_state = "unused";
             }
             return "invalid";
         }
@@ -159,6 +163,8 @@ class Action
         if (this.cells[0].change_strength(-this.extra_info[1]-extra_amount, true) == "clear")
         {
             this.cells[1].place_unit(this.extra_info[0], 1, this.extra_info[2], true);
+            if (this.cells[0].strength == 0) this.cells[0].remove_unit(false);
+            if (this.cells[1].strength == 0) this.cells[1].remove_unit(false);
             return "clear";
         }
         else return "invalid";
@@ -177,6 +183,7 @@ class Action
                 if (this.cells[0].strength > 8) this.cells[0].strength = 8;
                 if (this.cells[1].strength > 8) this.cells[1].strength = 8;
                 this.cells[1].remove_unit(false);
+                if (this.cells[0].strength == 0) this.cells[0].remove_unit(false);
                 return "clear";
             }
         }
@@ -228,6 +235,8 @@ class Action
             this.cells[2].remove_unit(false);
             this.cells[3].load_unit(unit);
             this.cells[3].use();
+            if (this.cells[0].strength == 0) this.cells[0].remove_unit(false);
+            if (this.cells[1].strength == 0) this.cells[1].remove_unit(false);
             return "clear";
         }
         else
@@ -321,6 +330,7 @@ class Game
     {
         this.selectable_tiles = [];
         this.action_in_progress = "none";
+        this.action_info = [];
         for (let row of this.board)
         {
             for (let cell of row)
@@ -512,8 +522,8 @@ class Game
                             inner_unit.setAttribute('onmouseenter', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].hover_color + "'");
                             inner_unit.setAttribute('onmouseleave', "this.style.borderBottomColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
-                        if (this.player_turn == this.board[i][j].player) inner_unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
-                        if (this.action_in_progress == "battle" && this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
+                        if (this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
+                        else if (this.player_turn == this.board[i][j].player) inner_unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
                         unit.append(inner_unit);
                         this.html_board.append(unit);
                     }
@@ -538,7 +548,7 @@ class Game
                             unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
                         if (this.player_turn == this.board[i][j].player) unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
-                        if (this.action_in_progress == "battle" && this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
+                        if (this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
                         this.html_board.append(unit);
                     }
                     else
@@ -565,7 +575,7 @@ class Game
                             unit.setAttribute('onmouseleave', "this.style.backgroundColor = '" + this.player_array[this.board[i][j].player].color + "'");
                         }
                         if (this.player_turn == this.board[i][j].player) unit.setAttribute("onclick", this.OBJECT_NAME + ".change_selected_tile(" + i + ", " + j + ")")
-                        if (this.action_in_progress == "battle" && this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
+                        if (this.board[i][j].visited) unit.setAttribute("onclick", this.OBJECT_NAME + ".tile_selected(" + i + ", " + j + ")")
                         this.html_board.append(unit);
                     }
                 }
@@ -677,6 +687,21 @@ class Game
             this.reset_ui();
             this.render();
         }
+        else if (this.action_in_progress == "transact")
+        {
+            let transact_number = prompt("How much strength would you like to input?");
+            if (transact_number !== null)
+            {
+                transact_number = Number(transact_number);
+                if (Number.isInteger(!Number.isNaN(transact_number) && transact_number))
+                {
+                    let action = new Action([this.get_selected_tile(), this.get_tile(tile)], "transact", transact_number, this);
+                    this.actions.push(action);
+                    this.reset_ui();
+                    this.render();
+                }
+            }
+        }
     }
     ask_action(action_name)
     {
@@ -736,6 +761,24 @@ class Game
                 }
             }
             this.action_in_progress = "battle";
+        }
+        else if (action_name == "transact")
+        {
+            let tiles = this.get_surrounding_cells(1, this.selected_tile, ["land", "soil", "water", "mountain", "ore deposit"], true);
+            for (let i = 0; i < tiles.length; i++)
+            {
+                let tile = tiles[i];
+                if (this.get_tile(tile).unit_type == "none" || this.get_selected_tile().player != this.get_tile(tile).player || !this.return_unit(this.get_tile(tile).unit_type).holds_strength)
+                {
+                    tiles.splice(i, 1);
+                    if (tiles.length > 0) i--;
+                }
+                else
+                {
+                    this.get_tile(tile).visited = true;
+                }
+            }
+            this.action_in_progress = "transact";
         }
         this.render();
     }
