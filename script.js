@@ -712,6 +712,18 @@ class Game
             this.render();
         }
     }
+    get_action_cells()
+    {
+        let cells = [];
+        for (let action of this.actions)
+        {
+            for (let cell of action.cells)
+            {
+                cells.push(cell);
+            }
+        }
+        return cells;
+    }
     ask_action(action_name)
     {
         this.reset_ui();
@@ -741,10 +753,11 @@ class Game
         else if (action_name == "move")
         {
             let tiles = this.get_surrounding_cells(1, this.selected_tile, this.return_unit(this.get_selected_tile().unit_type).available_tiles, true);
+            let in_use_tiles = this.get_action_cells();
             for (let i = 0; i < tiles.length; i++)
             {
                 let tile = tiles[i];
-                if (this.get_tile(tile).unit_type != "none")
+                if (this.get_tile(tile).unit_type != "none" || in_use_tiles.includes(this.get_tile(tile)))
                 {
                     tiles.splice(i, 1);
                     if (tiles.length > 0) i--;
@@ -756,10 +769,11 @@ class Game
         else if (action_name == "battle")
         {
             let tiles = this.get_surrounding_cells(1, this.selected_tile, ["land", "soil", "water", "mountain", "ore deposit"], true);
+            let in_use_tiles = this.get_action_cells();
             for (let i = 0; i < tiles.length; i++)
             {
                 let tile = tiles[i];
-                if (this.get_tile(tile).unit_type == "none" || this.get_selected_tile().player == this.get_tile(tile).player)
+                if (this.get_tile(tile).unit_type == "none" || this.get_selected_tile().player == this.get_tile(tile).player || in_use_tiles.includes(this.get_tile(tile)))
                 {
                     tiles.splice(i, 1);
                     if (tiles.length > 0) i--;
@@ -774,10 +788,11 @@ class Game
         else if (action_name == "transact")
         {
             let tiles = this.get_surrounding_cells(1, this.selected_tile, ["land", "soil", "water", "mountain", "ore deposit"], true);
+            let in_use_tiles = this.get_action_cells();
             for (let i = 0; i < tiles.length; i++)
             {
                 let tile = tiles[i];
-                if (this.get_tile(tile).unit_type == "none" || this.get_selected_tile().player != this.get_tile(tile).player || !this.return_unit(this.get_tile(tile).unit_type).holds_strength)
+                if (this.get_tile(tile).unit_type == "none" || this.get_selected_tile().player != this.get_tile(tile).player || !this.return_unit(this.get_tile(tile).unit_type).holds_strength || in_use_tiles.includes(this.get_tile(tile)))
                 {
                     tiles.splice(i, 1);
                     if (tiles.length > 0) i--;
@@ -818,11 +833,12 @@ class Game
                         }
                     }
                 }
+                let in_use_tiles = this.get_action_cells();
                 console.log(tiles);
                 for (let i = 0; i < tiles.length; i++)
                 {
                     let tile = tiles[i];
-                    if (this.get_tile(tile).unit_type != "none")
+                    if (this.get_tile(tile).unit_type != "none" || in_use_tiles.includes(this.get_tile(tile)))
                     {
                         tiles.splice(i, 1);
                         if (tiles.length > 0) i--;
