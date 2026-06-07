@@ -323,7 +323,7 @@ class Game
             new Unit("army", true, 4, ["land", "soil"], ["blockade", "city"], ["transact", "build", "battle", "trade", "move"]),
             new Unit("city", true, 5, ["soil", "ore deposit"], ["army", "navy", "trader", "blockade", "city"], ["produce", "transact", "build", "battle", "trade"]),
             new Unit("blockade", false, 4, ["land"], [], ["remove"]),
-            new Unit("trader", false, 3, ["land"], [], ["trade"])
+            new Unit("trader", false, 3, ["land", "soil"], [], ["move"])
         ];
         this.render();
     }
@@ -752,12 +752,17 @@ class Game
         }
         else if (action_name == "move")
         {
-            let tiles = this.get_surrounding_cells(1, this.selected_tile, this.return_unit(this.get_selected_tile().unit_type).available_tiles, true);
+            let tiles = [];
+            if (this.get_selected_tile().unit_type != "trader") tiles = this.get_surrounding_cells(1, this.selected_tile, this.return_unit(this.get_selected_tile().unit_type).available_tiles, true);
+            else
+            {
+                tiles = this.get_surrounding_cells(3, this.selected_tile, this.return_unit(this.get_selected_tile().unit_type).available_tiles, true);
+            }
             let in_use_tiles = this.get_action_cells();
             for (let i = 0; i < tiles.length; i++)
             {
                 let tile = tiles[i];
-                if (this.get_tile(tile).unit_type != "none" || in_use_tiles.includes(this.get_tile(tile)))
+                if (this.get_tile(tile).unit_type != "none" || in_use_tiles.includes(this.get_tile(tile)) || (this.get_selected_tile().unit_type == "trader" && this.get_tile(tile).land_type == "soil"))
                 {
                     tiles.splice(i, 1);
                     if (tiles.length > 0) i--;
