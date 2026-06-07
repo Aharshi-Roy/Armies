@@ -17,6 +17,7 @@ class Player
     {
         this.color = color;
         this.hover_color = hover_color;
+        this.is_dead = false;
     }
 }
 class Cell
@@ -349,6 +350,24 @@ class Game
             }
         }
     }
+    end_game()
+    {
+        this.html_board.remove();
+        this.info.remove();
+        this.end_turn_html.remove();
+        this.do_action_html.remove();
+        this.dialogue_box_html.remove();
+        let color;
+        for (let player of this.player_array)
+        {
+            if (!player.is_dead)
+            {
+                color = player.color;
+                break;
+            }
+        }
+        alert(color + " has won!")
+    }
     end_turn()
     {
         for (let row of this.board)
@@ -361,8 +380,50 @@ class Game
         this.reset_ui();
         this.actions = [];
         this.selected_tile = [-1, -1]
-        this.update_turn();
-        this.render();
+        if (this.update_players()) this.end_game();
+        {
+            this.update_turn();
+            this.render();
+        }
+    }
+    update_players()
+    {
+        let players_alive = 0;
+        for (let player of this.player_array)
+        {
+            if (player.is_dead) continue;
+            else
+            {
+                let done = false;
+                for (let i = 0; i < this.BOARD_HEIGHT && !done; i++)
+                {
+                    for (let j = 0; j < this.BOARD_WIDTH && !done; j++)
+                    {
+                        if (this.player_array[this.board[i][j].player] == player && this.board[i][j].unit_type == "city") done = true;
+                    }
+                }
+                if (!done)
+                {
+                    for (let i = 0; i < this.BOARD_HEIGHT && !done; i++)
+                    {
+                        for (let j = 0; j < this.BOARD_WIDTH && !done; j++)
+                        {
+                            if (this.player_array[this.board[i][j].player] == player)
+                            {
+                                this.board[i][j].remove_unit(false);
+                            }
+                        }
+                    }
+                    player.is_dead = true;
+                }
+                else
+                {
+                    players_alive++;
+                }
+            }
+        }
+        if (players_alive == 1) return true;
+        return false;
     }
     give_direction(num)
     {
@@ -432,8 +493,12 @@ class Game
     }
     update_turn()
     {
-        if (this.player_turn < this.player_amount-1) this.player_turn++;
-        else this.player_turn = 0;
+        while (true)
+        {
+            if (this.player_turn < this.player_amount-1) this.player_turn++;
+            else this.player_turn = 0;
+            if (!this.player_array[this.player_turn].is_dead) break;
+        }
     }
     return_unit(name)
     {

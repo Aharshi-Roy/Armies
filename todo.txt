@@ -6,5 +6,3 @@ Add trading
 Make menu
 Make board selector
 Make start game
-Make end game
-Make turn skipping
