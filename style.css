@@ -84,6 +84,16 @@ h1
     border-radius: 20px;
 }
 
+#DialogueBox
+{
+    background-color: red;
+    position: absolute;
+    border: 20px solid black;
+    border-radius: 20px;
+    overflow: auto;
+    font-size: large;
+}
+
 #DoAction:hover
 {
     background-color: dodgerblue;
