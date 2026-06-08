@@ -20,9 +20,23 @@
 
     <h1 style='text-align: left;'>New Game</h1>
     <h2>Players</h2>
-    <div id="players"></div>
-    <button class="MenuButton" onclick="add_player()">Add Player</button>
+    <div id='players'></div>
+    <button class='MenuButton' onclick='add_player()'>Add Player</button>
+    <br>
+    <br>
+    <label class='label_style' for='width'>Enter width:</label>
+    <input type='number' min="1" step="1" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+/, '');" id='width' name='width'>
+    <br>
+    <br>
+    <label class='label_style' for='height'>Enter height:</label>
+    <input type="number" min="1" step="1" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+/, '');" id='height' name='height'>
+    <br>
+    <br>
+    <button class='MenuButton' style="width: 200px; height: 100px;" onclick='search_boards()'>Search boards</button>
+    <br>
+    <div id="maps">
 
+    </div>
     <script src="script.js" defer></script>
 </body>
 </html>

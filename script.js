@@ -952,6 +952,16 @@ class Game
     }
 }
 
+class Board
+{
+    constructor(map_string, width, height, players)
+    {
+        this.map_string = map_string;
+        this.width = width;
+        this.height = height;
+        this.players = players;
+    }
+}
 // let player = new Player("blue", "dodgerblue", "blue");
 // let player2 = new Player("red", "pink", "red");
 // let player3 = new Player("forestgreen", "lawngreen", "green")
@@ -963,7 +973,12 @@ class Game
 //     console.log(game.get_surrounding_cells(6, [3, 3], ["land", "soil", "water", "mountain", "ore deposit"], true))
 //     game.render();
 // }
+
+let boards = [];
+boards.push(new Board("0cs0alllllollslllmllwww1al1cslmwwwwwlswwowwllwwwwwl2al2cswwww", 7, 7, 3))
+boards.push(new Board("wwwswwwwwlllwwwlllllwwomsmowwlllllwwlllllwsllwlls", 7, 7, 3))
 let body = document.body;
+let player_amount_global = 0;
 function make_new_game()
 {
     body.innerHTML = "";
@@ -971,6 +986,7 @@ function make_new_game()
 
 function add_player()
 {
+    player_amount_global++;
     let players = document.getElementById("players");
     let player = document.createElement("div");
     player.classList.add("MenuDiv");
@@ -986,5 +1002,21 @@ function add_player()
 
 function remove_player(element)
 {
+    player_amount_global--;
     element.parentElement.remove();
+}
+
+function search_boards()
+{
+    console.log("Here");
+    let width = parseInt(document.getElementById("width").value);
+    let height = parseInt(document.getElementById("height").value);
+    console.log(width);
+    console.log(height);
+    console.log(player_amount_global);
+    let available_boards = [];
+    for (let board of boards)
+    {
+        if (board.width == width && board.height == height && board.players == player_amount_global) available_boards.push(board);
+    }
 }
