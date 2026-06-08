@@ -963,3 +963,28 @@ class Game
 //     console.log(game.get_surrounding_cells(6, [3, 3], ["land", "soil", "water", "mountain", "ore deposit"], true))
 //     game.render();
 // }
+let body = document.body;
+function make_new_game()
+{
+    body.innerHTML = "";
+}
+
+function add_player()
+{
+    let players = document.getElementById("players");
+    let player = document.createElement("div");
+    player.classList.add("MenuDiv");
+    player.style.width = 600 + "px";
+    player.innerHTML += "<label class='label_style' for='player_name'>Enter name:</label> <input type='text' id='player_name' name='username'> <br> <label class='label_style' for='color'>Choose a color:</label><input type='color' id='color' name='color' value='#ffffff'>";
+    let button = document.createElement("button");
+    button.classList.add("delete")
+    button.innerHTML = "x";
+    button.setAttribute("onclick", "remove_player(this)")
+    player.append(button);
+    players.append(player);
+}
+
+function remove_player(element)
+{
+    element.parentElement.remove();
+}
