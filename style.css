@@ -127,3 +127,28 @@ h1
 {
     background-color: red;
 }
+
+.BodyClass
+{
+    background-image: url("Images/Armies_board.png");
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+    text-align: center;
+}
+
+.MenuButton
+{
+    border: 5px solid black;
+    background-color: papayawhip;
+    border-radius: 20px;
+    width: 400px;
+    height: 150px;
+    margin-top: 50px;
+    font-size: 25pt;
+}
+
+.MenuButton:hover
+{
+    background-color: sandybrown;
+}

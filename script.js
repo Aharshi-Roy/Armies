@@ -952,14 +952,14 @@ class Game
     }
 }
 
-let player = new Player("blue", "dodgerblue", "blue");
-let player2 = new Player("red", "pink", "red");
-let player3 = new Player("forestgreen", "lawngreen", "green")
-let game = new Game("Board", 7, 7, 1000, 1000, 3, "0cs0alllllollslllmllwww1al1cslmwwwwwlswwowwllwwwwwl2al2cswwww", [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
+// let player = new Player("blue", "dodgerblue", "blue");
+// let player2 = new Player("red", "pink", "red");
+// let player3 = new Player("forestgreen", "lawngreen", "green")
+// let game = new Game("Board", 7, 7, 1000, 1000, 3, "0cs0alllllollslllmllwww1al1cslmwwwwwlswwowwllwwwwwl2al2cswwww", [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
 
-run_tests();
-function run_tests()
-{
-    console.log(game.get_surrounding_cells(6, [3, 3], ["land", "soil", "water", "mountain", "ore deposit"], true))
-    game.render();
-}
+// run_tests();
+// function run_tests()
+// {
+//     console.log(game.get_surrounding_cells(6, [3, 3], ["land", "soil", "water", "mountain", "ore deposit"], true))
+//     game.render();
+// }
