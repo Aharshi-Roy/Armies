@@ -5,4 +5,3 @@ Needed:
 Add trading
 Make menu
 Make board selector
-Make start game

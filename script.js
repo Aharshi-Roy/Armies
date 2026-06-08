@@ -13,11 +13,12 @@ class Unit
 
 class Player
 {
-    constructor(color, hover_color)
+    constructor(color, hover_color, name)
     {
         this.color = color;
         this.hover_color = hover_color;
         this.is_dead = false;
+        this.name = name;
     }
 }
 class Cell
@@ -256,7 +257,7 @@ class Action
 }
 class Game
 {
-    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, option, player_array, INFO_ID, INFO_WIDTH, OBJECT_NAME, DO_ACTION_ID, END_TURN_ID, DIALOGUE_BOX_ID, TURN_BUTTON_HEIGHT)
+    constructor(BOARD_ID, BOARD_WIDTH, BOARD_HEIGHT, BOARD_PIXEL_WIDTH, BOARD_PIXEL_HEIGHT, player_amount, MAP_STRING, player_array, INFO_ID, INFO_WIDTH, OBJECT_NAME, DO_ACTION_ID, END_TURN_ID, DIALOGUE_BOX_ID, TURN_BUTTON_HEIGHT)
     {
         this.BOARD_ID = BOARD_ID;
         this.BOARD_WIDTH = BOARD_WIDTH;
@@ -314,17 +315,17 @@ class Game
         this.board = map;
         this.html_board.style.width = this.BOARD_PIXEL_WIDTH + "px";
         this.html_board.style.height = this.BOARD_PIXEL_HEIGHT + "px";
-        this.set_map(BOARD_WIDTH, BOARD_HEIGHT, player_amount, option);
-        this.get_tile([5, 2]).place_unit("navy", 3, 1, false);
-        this.get_tile([5, 1]).place_unit("army", 1, 1, false);
-        this.get_tile([5, 0]).place_unit("trader", 0, 0, false);
-        this.get_tile([6, 1]).place_unit("blockade", 3, 0, false);
-        this.get_tile([6, 2]).place_unit("city", 5, 0, false);
-        this.get_tile([0, 0]).place_unit("city", 8, 2, false);
-        this.get_tile([4, 4]).place_unit("city", 8, 2, false);
-        this.get_tile([4, 3]).place_unit("navy", 1, 2, false);
-        this.get_tile([0, 6]).place_unit("city", 1, 2, false);
-        this.get_tile([0, 1]).place_unit("trader", 0, 2, false);
+        this.set_map(MAP_STRING);
+        // this.get_tile([5, 2]).place_unit("navy", 3, 1, false);
+        // this.get_tile([5, 1]).place_unit("army", 1, 1, false);
+        // this.get_tile([5, 0]).place_unit("trader", 0, 0, false);
+        // this.get_tile([6, 1]).place_unit("blockade", 3, 0, false);
+        // this.get_tile([6, 2]).place_unit("city", 5, 0, false);
+        // this.get_tile([0, 0]).place_unit("city", 8, 2, false);
+        // this.get_tile([4, 4]).place_unit("city", 8, 2, false);
+        // this.get_tile([4, 3]).place_unit("navy", 1, 2, false);
+        // this.get_tile([0, 6]).place_unit("city", 1, 2, false);
+        // this.get_tile([0, 1]).place_unit("trader", 0, 2, false);
         this.action_extra = "";
         this.unit_array = 
         [
@@ -357,16 +358,16 @@ class Game
         this.end_turn_html.remove();
         this.do_action_html.remove();
         this.dialogue_box_html.remove();
-        let color;
+        let name;
         for (let player of this.player_array)
         {
             if (!player.is_dead)
             {
-                color = player.color;
+                name = player.name;
                 break;
             }
         }
-        alert(color + " has won!")
+        alert(name + " has won!")
     }
     end_turn()
     {
@@ -508,28 +509,43 @@ class Game
         else if (name == "blockade") return this.unit_array[3];
         else if (name == "trader") return this.unit_array[4];
     }
-    set_map(x, y, players, option)
+    set_map(map_string)
     {
-        let map_string = "";
-        if (x == 7 && y == 7 && players == 3)
-        {
-            if (option == 1) map_string = "slllllollslllmllwwwlslmwwwwwlswwowwllwwwwwllswwww";
-            else if (option == 2) map_string = "wwwswwwwwlllwwwlllllwwomsmowwlllllwwlllllwsllwlls";
-        }
-        else if (x == 5 && y == 5 && players == 2)
-        {
-            if (option == 1) map_string = "slllswllwwwwlwwwwllwsllls";
-        }
-        else if (x == 10 && y == 10 && players == 4)
-        {
-            if (option == 1) map_string = "sllllllwwwlllllswwwwllswwwwwwsllwwwwwwllwswwslwsllwwwwlllllllwwwwlommlswwwsllmollwwlllmlllwwslllllls";
-        }
+        // let map_string = "";
+        // if (x == 7 && y == 7 && players == 3)
+        // {
+        //     if (option == 1) map_string = "slllllollslllmllwwwlslmwwwwwlswwowwllwwwwwllswwww";
+        //     else if (option == 2) map_string = "wwwswwwwwlllwwwlllllwwomsmowwlllllwwlllllwsllwlls";
+        // }
+        // else if (x == 5 && y == 5 && players == 2)
+        // {
+        //     if (option == 1) map_string = "slllswllwwwwlwwwwllwsllls";
+        // }
+        // else if (x == 10 && y == 10 && players == 4)
+        // {
+        //     if (option == 1) map_string = "sllllllwwwlllllswwwwllswwwwwwsllwwwwwwllwswwslwsllwwwwlllllllwwwwlommlswwwsllmollwwlllmlllwwslllllls";
+        // }
+        let offset = 0;
         for (let i = 0; i < this.BOARD_HEIGHT; i++)
         {
             for (let j = 0; j < this.BOARD_WIDTH; j++)
             {
-                let c = map_string[i*this.BOARD_HEIGHT+j];
+                let number = parseInt(map_string.slice([i*this.BOARD_HEIGHT+j+offset]), 10);
+                if (!Number.isNaN(number))
+                {
+                    let digits = String(Math.abs(number)).length;
+                    offset += digits+1;
+                    let unit_character = map_string[i*this.BOARD_HEIGHT+j+offset-1];
+                    let unit;
+                    if (unit_character == "c") unit = "city";
+                    else if (unit_character == "a") unit = "army";
+                    else if (unit_character == "n") unit = "navy";
+                    this.board[i][j].place_unit(unit, 3, number, false);
+                }
+
+                let c = map_string[i*this.BOARD_HEIGHT+j+offset];
                 let land_type;
+
                 if (c == 'l') land_type = "land";
                 else if (c == 'w') land_type = "water";
                 else if (c == 's') land_type = "soil";
@@ -936,10 +952,10 @@ class Game
     }
 }
 
-let player = new Player("blue", "dodgerblue");
-let player2 = new Player("red", "pink");
-let player3 = new Player("forestgreen", "lawngreen")
-let game = new Game("Board", 7, 7, 1000, 1000, 3, 1, [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
+let player = new Player("blue", "dodgerblue", "blue");
+let player2 = new Player("red", "pink", "red");
+let player3 = new Player("forestgreen", "lawngreen", "green")
+let game = new Game("Board", 7, 7, 1000, 1000, 3, "0cs0alllllollslllmllwww1al1cslmwwwwwlswwowwllwwwwwl2al2cswwww", [player, player2, player3], "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
 
 run_tests();
 function run_tests()
