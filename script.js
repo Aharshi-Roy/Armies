@@ -954,12 +954,14 @@ class Game
 
 class Board
 {
-    constructor(map_string, width, height, players)
+    constructor(map_string, width, height, players, image_path, name)
     {
         this.map_string = map_string;
         this.width = width;
         this.height = height;
         this.players = players;
+        this.image_path = image_path
+        this.name = name;
     }
 }
 // let player = new Player("blue", "dodgerblue", "blue");
@@ -974,14 +976,47 @@ class Board
 //     game.render();
 // }
 
+function quick_darken(hex, percent)
+{
+  const num = parseInt(hex.replace("#",""), 16);
+  const amt = Math.round(2.55 * percent);
+  
+  const R = (num >> 16) - amt;
+  const G = (num >> 8 & 0x00FF) - amt;
+  const B = (num & 0x0000FF) - amt;
+  
+  return "#" + (0x1000000 + (R < 0 ? 0 : R) * 0x10000 + (G < 0 ? 0 : G) * 0x100 + (B < 0 ? 0 : B)).toString(16).slice(1);
+}
+
+let game;
+
+function start_game(board)
+{
+    let entering_players = [];
+    for (let i = 0; i < player_id_num; i++)
+    {
+        let name = document.getElementById("player_name-" + i);
+        if (name != null)
+        {
+            let color = document.getElementById("color-" + i);
+            entering_players.push(new Player(color.value, quick_darken(color.value, 30), name.value));
+        }
+    }
+    console.log(entering_players);
+    body.innerHTML = "<div id='Board'></div><div id='Info'></div> <button id='DoAction'>Do Action</button> <button id='EndTurn'>End Turn</button> <button id='DialogueBox'></button>";
+    game = new Game("Board", board.width, board.height, 1000, 1000, board.players, board.map_string, entering_players, "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
+}
+
 let boards = [];
-boards.push(new Board("0cs0alllllollslllmllwww1al1cslmwwwwwlswwowwllwwwwwl2al2cswwww", 7, 7, 3))
-boards.push(new Board("wwwswwwwwlllwwwlllllwwomsmowwlllllwwlllllwsllwlls", 7, 7, 3))
+boards.push(new Board("0cs0alllllollslllmllwww1al1cslmwwwwwlswwowwllwwwwwl2al2cswwww", 7, 7, 3, "Images/board_images/TheHarbor.png", "The Harbor"))
+boards.push(new Board("www0cswwwwwl0allwwwlllllwwomsmowwlllllwwlllllw1cs1allwl2al2cs", 7, 7, 3, "Images/board_images/triangle.png", "Triangle"))
 let body = document.body;
 let player_amount_global = 0;
+let player_id_num = 0;
 function make_new_game()
 {
-    body.innerHTML = "";
+    body.innerHTML = "<h1 style='text-align: left; font-size: 100pt;'>New Game</h1> <h2 style='font-size: 50pt;'>Players</h2> <div id='players'></div> <button class='MenuButton' onclick='add_player()'>Add Player</button> <br> <br> <label class='label_style' for='width'>Enter width:</label> <input type='number' min='1' step='1' inputmode='numeric' oninput=\"this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+/, '');\" id='width' name='width'> <br> <br> <label class='label_style' for='height'>Enter height:</label> <input type='number' min='1' step='1' inputmode='numeric' oninput=\"this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+/, '');\" id='height' name='height'> <br> <br> <button class='MenuButton' style='width: 200px; height: 100px;'' onclick='search_boards()'>Search boards</button> <br> <div id='boards'>";
+    body.style.textAlign = "left";
 }
 
 function add_player()
@@ -991,19 +1026,22 @@ function add_player()
     let player = document.createElement("div");
     player.classList.add("MenuDiv");
     player.style.width = 600 + "px";
-    player.innerHTML += "<label class='label_style' for='player_name'>Enter name:</label> <input type='text' id='player_name' name='username'> <br> <label class='label_style' for='color'>Choose a color:</label><input type='color' id='color' name='color' value='#ffffff'>";
+    player.innerHTML += "<label class='label_style' for='player_name'>Enter name:</label> <input type='text' id='player_name" + "-" + player_id_num + "' name='username'> <br> <label class='label_style' for='color'>Choose a color:</label><input type='color' id='color" + "-" + player_id_num + "' name='color' value='#ffffff'>";
+    player_id_num++;
     let button = document.createElement("button");
     button.classList.add("delete")
     button.innerHTML = "x";
     button.setAttribute("onclick", "remove_player(this)")
     player.append(button);
     players.append(player);
+    search_boards();
 }
 
 function remove_player(element)
 {
     player_amount_global--;
     element.parentElement.remove();
+    search_boards();
 }
 
 function search_boards()
@@ -1014,9 +1052,27 @@ function search_boards()
     console.log(width);
     console.log(height);
     console.log(player_amount_global);
+    let can_pass = [false, false, false];
+    if (Number.isNaN(width)) can_pass[0] = true;
+    if (Number.isNaN(height)) can_pass[1] = true;
     let available_boards = [];
     for (let board of boards)
     {
-        if (board.width == width && board.height == height && board.players == player_amount_global) available_boards.push(board);
+        if ((board.width == width || can_pass[0]) && (board.height == height || can_pass[1]) && board.players == player_amount_global) available_boards.push(board);
+    }
+
+    let boards_html = document.getElementById("boards");
+    boards_html.innerHTML = "";
+    for (let board of available_boards)
+    {
+        let board_info = document.createElement("button");
+        board_info.classList.add("MenuButton");
+        board_info.onclick = () => start_game(board);
+        board_info.innerHTML += "<img class='board_image' src='" + board.image_path + "' alt='Board Image' height='120'>";
+        board_info.innerHTML += "<p class='board_text'>" + board.name + "</p>";
+
+        boards_html.append(board_info);
+        let br = document.createElement("br");
+        boards_html.append(br);
     }
 }

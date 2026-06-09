@@ -134,7 +134,7 @@ h1
     background-attachment: fixed;
     background-size: cover;
     min-height: 100vh;
-    text-align: left;
+    text-align: center;
 }
 
 .MenuButton
@@ -164,16 +164,6 @@ h1
     font-size: 25pt;
 }
 
-h1
-{
-    font-size: 100pt;
-}
-
-h2
-{
-    font-size: 50pt;
-}
-
 .label_style
 {
     margin-left: 10px;
@@ -194,4 +184,20 @@ h2
 .delete:hover
 {
     background-color: red;
+}
+
+.board_image
+{
+    position: relative;
+    left: -100px;
+    top: 5px;
+}
+
+.board_text
+{
+    position: relative;
+    top: -125px;
+    left: 150px;
+    width: 230px;
+    height: 75px;
 }

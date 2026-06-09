@@ -3,5 +3,3 @@ Add pricing stops
 
 Needed:
 Add trading
-Make menu
-Make board selector
