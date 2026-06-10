@@ -1165,6 +1165,10 @@ function start_game(board)
 let boards = [];
 boards.push(new Board("0cs0alllllollslllmllwww1al1cslmwwwwwlswwowwllwwwwwl2al2cswwww", 7, 7, 3, "Images/board_images/TheHarbor.png", "The Harbor"))
 boards.push(new Board("www0cswwwwwl0allwwwlllllwwomsmowwlllllwwlllllw1cs1allwl2al2cs", 7, 7, 3, "Images/board_images/triangle.png", "Triangle"))
+boards.push(new Board("0cs0alllswllwwwwlwwwwllwsll1al1cs", 5, 5, 2, "Images/board_images/Isthmus.png", "Isthmus"));
+boards.push(new Board("0cs0allllllwwwlllllswwwwllswwwwww1csllwwwwwwl1alwswwslwsllwwwwlllllllwwwwlomml2cs2nwwwsllmollwwlllmlllwwslllll3al3cs", 10, 10, 4, "Images/board_images/Continental.png", "Continental"));
+boards.push(new Board("wwwwwl0cowllwsl0alwllwwll1cs1allswmlwllwwllwllwsllwwwww2al2co", 7, 7, 3, "/Users/aharshiroy/Documents/Armies/Images/board_images/Channel.png", "Channel"));
+boards.push(new Board("llllllolswl0allllwww0csllllwwwwlolwwwllllwwwsll1al1cswwwl", 7, 7, 2, "Images/board_images/Bay.png", "Bay"));
 let body = document.body;
 let player_amount_global = 0;
 let player_id_num = 0;

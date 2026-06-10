@@ -1,2 +1,2 @@
-Optional:
-Add maps
+TODO:
+Use cookies
