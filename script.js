@@ -227,9 +227,8 @@ class Action
         // First cell is giver, second cell recieves, and third is trader location, fourth is trader destination, and extra info is amount of strength being traded
         let extra_amount = 0;
         if (this.cells[0].is_ore_deposit()) extra_amount++;
-        if (this.cells[1].is_ore_deposit()) extra_amount++;
-        extra_amount += this.extra_info[1]; 
-        let return1 = this.cells[0].change_strength(-this.extra_info[0]-extra_amount, true);
+        if (this.cells[1].is_ore_deposit()) extra_amount++; 
+        let return1 = this.cells[0].change_strength(-this.extra_info[0]-extra_amount-this.extra_info[1], true);
         let return2 = this.cells[1].change_strength(this.extra_info[1], true);
         if (return1 == "clear" && return2 == "clear")
         {
@@ -245,11 +244,11 @@ class Action
         {
             if (return1 == "clear")
             {
-                this.cells[0].change_strength(this.extra_info+extra_amount, true);
+                this.cells[0].change_strength(this.extra_info[1]+extra_amount+this.extra_info[0], true);
             }
             if (return2 == "clear")
             {
-                this.cells[1].change_strength(-this.extra_info, true);
+                this.cells[1].change_strength(-this.extra_info[1], true);
             }
             return "invalid";
         }
@@ -318,7 +317,7 @@ class Game
         this.set_map(MAP_STRING);
         // this.get_tile([5, 2]).place_unit("navy", 3, 1, false);
         // this.get_tile([5, 1]).place_unit("army", 1, 1, false);
-        // this.get_tile([5, 0]).place_unit("trader", 0, 0, false);
+        // this.get_tile([5, 0]).place_unit("blockade", 0, 0, false);
         // this.get_tile([6, 1]).place_unit("blockade", 3, 0, false);
         // this.get_tile([6, 2]).place_unit("city", 5, 0, false);
         // this.get_tile([0, 0]).place_unit("city", 8, 2, false);
@@ -326,6 +325,10 @@ class Game
         // this.get_tile([4, 3]).place_unit("navy", 1, 2, false);
         // this.get_tile([0, 6]).place_unit("city", 1, 2, false);
         // this.get_tile([0, 1]).place_unit("trader", 0, 2, false);
+        // this.get_tile([3, 0]).place_unit("trader", 0, 0, false);
+        // this.get_tile([2, 0]).place_unit("army", 4, 2, false);
+        // this.get_tile([1, 5]).place_unit("army", 4, 2, false);
+        // this.get_tile([0, 3]).place_unit("army", 4, 1, false);
         this.action_extra = "";
         this.unit_array = 
         [
@@ -445,7 +448,8 @@ class Game
     {
         let current_wave = [starting];
         let past_wave = [];
-        
+        let is_trader = false;
+        if (available_tiles.includes("trader")) is_trader = true;
         this.get_tile(starting).visited = true;
 
         for (let current_distance = 0; current_distance < distance; current_distance++)
@@ -461,7 +465,10 @@ class Game
 
                     let tile = this.get_tile(next_cell);
                     if (!available_tiles.includes(tile.land_type) || tile.visited) continue;
-
+                    if (is_trader)
+                    {
+                        if (tile.unit_type != "none" && tile.unit_type != "trader" && this.get_tile(starting).player != tile.player) continue;
+                    }
                     tile.visited = true;
                     next_wave.push(next_cell);
                 }
@@ -805,6 +812,85 @@ class Game
             this.reset_ui();
             this.render();
         }
+        else if (this.action_in_progress == "trade")
+        {
+            console.log("Here2");
+            let unit_tiles = this.get_surrounding_cells(1, tile, ["land", "soil", "water", "mountain", "ore deposit"], true);
+            console.log(unit_tiles);
+            let in_use_tiles = this.get_action_cells();
+            for (let i = 0; i < unit_tiles.length; i++)
+            {
+                let unit_tile = unit_tiles[i];
+                if (this.get_tile(unit_tile).unit_type == "none" || in_use_tiles.includes(this.get_tile(unit_tile)) || this.get_tile(this.action_extra).player != this.get_tile(unit_tile).player)
+                {
+                    console.log("Removing");
+                    unit_tiles.splice(i, 1);
+                    if (unit_tiles.length > 0) i--;
+                }
+            }
+            let trading_cell;
+            if (unit_tiles.length == 0) return;
+            else if (unit_tiles.length == 1) trading_cell = unit_tiles[0];
+            else if (unit_tiles.length > 1)
+            {
+                let answer;
+                while (true)
+                {
+                    let text = "What direction unit do you want?";
+                    let available_directions = [];
+                    for (let unit_tile of unit_tiles)
+                    {
+                        text += "\n" + this.find_direction(tile, unit_tile);
+                        available_directions.push(this.find_direction(tile, unit_tile));
+                    }
+                    answer = prompt(text);
+                    if (available_directions.includes(answer)) break;
+                }
+                trading_cell = this.cell_in_direction(answer, tile);
+            }
+            console.log("Here3")
+            let distance = 0;
+            while (true)
+            {
+                distance++;
+                let fake_tiles = this.get_surrounding_cells(distance, trading_cell, ["land", "soil", "trader"], true);
+                let found = false;
+                for (let fake_tile of fake_tiles)
+                {
+                    if (this.action_extra[0] == fake_tile[0] && this.action_extra[1] == fake_tile[1])
+                    {
+                        console.log(fake_tiles);
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+                // let found = fake_tiles.some(tile =>
+                //     tile[0] === this.action_extra[0] && tile[1] === this.action_extra[1]
+                // );
+
+                // if (found) break;
+                // if (distance > this.BOARD_WIDTH + this.BOARD_HEIGHT) break;
+            }
+            console.log(distance);
+            console.log(this.action_extra);
+            distance--;
+            let extra_amount = 0;
+            if (distance % 3 != 0) extra_amount = 1; 
+            let cost = Math.trunc(distance / 3)+extra_amount;
+            let transact_number = prompt("How much strength would you like to input? The cost is already: " + cost);
+            if (transact_number !== null)
+            {
+                transact_number = Number(transact_number);
+                if (Number.isInteger(!Number.isNaN(transact_number) && transact_number))
+                {
+                    let action = new Action([this.get_selected_tile(), this.get_tile(trading_cell), this.get_tile(this.action_extra), this.get_tile(tile)], "trade", [cost, transact_number], this);
+                    this.actions.push(action);
+                    this.reset_ui();
+                    this.render();
+                }
+            }
+        }
     }
     get_action_cells()
     {
@@ -817,6 +903,13 @@ class Game
             }
         }
         return cells;
+    }
+    find_direction(starting, next)
+    {
+        if (next[0] > starting[0]) return "down";
+        else if (next[0] < starting[0]) return "up";
+        else if (next[1] < starting[1]) return "left";
+        else if (next[1] > starting[1]) return "right";
     }
     ask_action(action_name)
     {
@@ -902,6 +995,66 @@ class Game
                 }
             }
             this.action_in_progress = "transact";
+        }
+        else if (action_name == "trade")
+        {
+            let unit_tiles = this.get_surrounding_cells(1, this.selected_tile, ["land", "soil", "water", "mountain", "ore deposit"], true);
+            let in_use_tiles = this.get_action_cells();
+            for (let i = 0; i < unit_tiles.length; i++)
+            {
+                let unit_tile = unit_tiles[i];
+                if (this.get_tile(unit_tile).unit_type != "trader" || in_use_tiles.includes(this.get_tile(unit_tile)) || this.get_selected_tile().player != this.get_tile(unit_tile).player)
+                {
+                    unit_tiles.splice(i, 1);
+                    if (unit_tiles.length > 0) i--;
+                }
+            }
+            let trading_cell;
+            if (unit_tiles.length == 0) return;
+            else if (unit_tiles.length == 1) trading_cell = unit_tiles[0];
+            else if (unit_tiles.length > 1)
+            {
+                let answer;
+                while (true)
+                {
+                    let text = "What direction trader do you want?";
+                    let available_directions = [];
+                    for (let tile of unit_tiles)
+                    {
+                        text += "\n" + this.find_direction(this.selected_tile, tile);
+                        available_directions.push(this.find_direction(this.selected_tile, tile));
+                    }
+                    answer = prompt(text);
+                    if (available_directions.includes(answer)) break;
+                }
+                trading_cell = this.cell_in_direction(answer, this.selected_tile);
+            }
+            let tiles = this.get_surrounding_cells(this.get_selected_tile().strength*3, trading_cell, ["land", "soil", "trader"], true);
+            for (let i = 0; i < tiles.length; i++)
+            {
+                let tile = tiles[i];
+                let surrounding_the_tile = this.get_surrounding_cells(1, tile, ["land", "soil", "water", "mountain", "ore deposit"], true);
+                let same_team = false;
+                for (let the_tile of surrounding_the_tile)
+                {
+                    if (this.get_tile(the_tile).player == this.get_tile(trading_cell).player && this.return_unit(this.get_tile(the_tile).unit_type).holds_strength)
+                    {
+                        console.log("Breaking");
+                        same_team = true;
+                        break;
+                    }
+                }
+                if (this.get_tile(tile).land_type == "soil" || (this.get_tile(tile).player != -1 && this.get_tile(tile).player != this.get_tile(trading_cell).player) || in_use_tiles.includes(this.get_tile(tile)) || !same_team)
+                {
+                    console.log("Removing")
+                    tiles.splice(i, 1);
+                    if (tiles.length > 0) i--;
+                }
+            }
+            console.log(tiles);
+            this.action_in_progress = action_name;
+            this.selectable_tiles = tiles;
+            this.action_extra = trading_cell;
         }
         else if (action_name == "build")
         {
@@ -1026,7 +1179,7 @@ function add_player()
     let player = document.createElement("div");
     player.classList.add("MenuDiv");
     player.style.width = 600 + "px";
-    player.innerHTML += "<label class='label_style' for='player_name'>Enter name:</label> <input type='text' id='player_name" + "-" + player_id_num + "' name='username'> <br> <label class='label_style' for='color'>Choose a color:</label><input type='color' id='color" + "-" + player_id_num + "' name='color' value='#ffffff'>";
+    player.innerHTML += "<label class='label_style' for='player_name'>Enter name:</label> <input type='text' id='player_name" + "-" + player_id_num + "' name='username'> <br> <label class='label_style' for='color'>Choose a color:</label><input type='color' id='color" + "-" + player_id_num + "' name='color' value='red'>";
     player_id_num++;
     let button = document.createElement("button");
     button.classList.add("delete")
