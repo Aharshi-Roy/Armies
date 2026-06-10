@@ -1066,6 +1066,8 @@ class Game
                 text += String(i+1);
                 text += ". ";
                 text += available_to_build[i];
+                text += " - ";
+                text += this.return_unit(available_to_build[i]).cost;
             }
             let unit_to_build = prompt("What do you want to build? Write the unit" + text);
             if (available_to_build.includes(unit_to_build))

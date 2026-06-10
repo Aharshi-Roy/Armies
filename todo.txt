@@ -1,3 +1,2 @@
 Optional:
-Add pricing stops
 Add maps
