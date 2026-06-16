@@ -1147,6 +1147,12 @@ let game;
 
 function start_game(board)
 {
+    let answer;
+    while (true)
+    {
+        answer = prompt("What will the name of this world be? By staring this game, you accept cookies that are only used to save the game.");
+        if (answer != null && answer != "") break;
+    }
     let entering_players = [];
     for (let i = 0; i < player_id_num; i++)
     {
@@ -1160,6 +1166,11 @@ function start_game(board)
     console.log(entering_players);
     body.innerHTML = "<div id='Board'></div><div id='Info'></div> <button id='DoAction'>Do Action</button> <button id='EndTurn'>End Turn</button> <button id='DialogueBox'></button>";
     game = new Game("Board", board.width, board.height, 1000, 1000, board.players, board.map_string, entering_players, "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
+    window.addEventListener('pagehide', (event) => 
+    {
+        let jsonString = JSON.stringify(game); 
+        document.cookie = `game_data=${encodeURIComponent(jsonString)};`;
+    });
 }
 
 let boards = [];
@@ -1234,4 +1245,23 @@ function search_boards()
         let br = document.createElement("br");
         boards_html.append(br);
     }
+}
+
+function loadGame() {
+    let name;
+    while (true)
+    {
+        name = prompt("What is the name of the save file?");
+        if (name != "" && name != null) break;
+    }
+    name = name + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    return "";
+}
+
+while (true)
+{
+    let answer;
+    answer = prompt("Website is under maintenance. Please enter developer password if wanting to access website.")
+    if (answer == "turtle") break;
 }
