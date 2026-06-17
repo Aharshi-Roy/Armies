@@ -253,6 +253,14 @@ class Action
             return "invalid";
         }
     }
+    toJSON()
+    {
+        return {
+            cells: this.cells,
+            action_name: this.action_name,
+            extra_info: this.extra_info
+        };
+    }
 }
 class Game
 {
@@ -1177,7 +1185,7 @@ function start_game(board)
     let answer;
     while (true)
     {
-        answer = prompt("What will the name of this world be? By staring this game, you accept cookies that are only used to save the game.");
+        answer = prompt("What will the name of this world be?");
         if (answer != null && answer != "") break;
     }
     let entering_players = [];
@@ -1195,12 +1203,18 @@ function start_game(board)
     game = new Game("Board", board.width, board.height, 1000, 1000, board.players, board.map_string, entering_players, "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
     window.addEventListener('pagehide', (event) => 
     {
-        let jsonString = JSON.stringify(game); 
-        document.cookie += "game_name=" + answer + ";game_data=" + encodeURIComponent(jsonString) + ";";
+        let jsonString = JSON.stringify(game);
+        let past_cookie = localStorage.getItem("cookie");
+        if (past_cookie == null) past_cookie = "";
+        localStorage.setItem("cookie", past_cookie + answer + ";");
+        localStorage.setItem(answer, jsonString);
         // console.log("game_name=" + answer + ";game_data=" + jsonString + ";");
     });
-    let jsonString = JSON.stringify(game); 
-    document.cookie += "game_name=" + answer + ";game_data=" + encodeURIComponent(jsonString) + ";";
+    let jsonString = JSON.stringify(game);
+    let past_cookie = localStorage.getItem("cookie");
+    if (past_cookie == null) past_cookie = "";
+    localStorage.setItem("cookie", past_cookie + answer + ";");
+    localStorage.setItem(answer, jsonString);
     // console.log("game_name=" + answer + ";game_data=" + jsonString + ";");
     // loadGame();
 }
@@ -1279,7 +1293,8 @@ function search_boards()
     }
 }
 
-function loadGame() {
+function loadGame()
+{
     // let name;
     // while (true)
     // {
@@ -1290,61 +1305,99 @@ function loadGame() {
     // let decodedCookie = decodeURIComponent(document.cookie);
     //let decodedCookie = `game_name=saka;game_data={"BOARD_ID":"Board","BOARD_WIDTH":7,"BOARD_HEIGHT":7,"BOARD_PIXEL_WIDTH":1000,"BOARD_PIXEL_HEIGHT":1000,"BOARD_CELL_PIXEL_WIDTH":142.85714285714286,"BOARD_CELL_PIXEL_HEIGHT":142.85714285714286,"OBJECT_NAME":"game","INFO_WIDTH":400,"TURN_BUTTON_HEIGHT":100,"selected_tile":[-1,-1],"actions":[],"player_amount":3,"player_turn":0,"player_array":[{"color":"#00ff1e","hover_color":"#00b200","is_dead":false,"name":""},{"color":"#ff0059","hover_color":"#b2000c","is_dead":false,"name":""},{"color":"#0033ff","hover_color":"#0000b2","is_dead":false,"name":""}],"html_board":{},"info":{},"do_action_html":{},"end_turn_html":{},"dialogue_box_html":{},"selectable_tiles":[],"battling":false,"board":[[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"ore deposit","unit_type":"city","strength":3,"player":0,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":0,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"soil","unit_type":"city","strength":3,"player":1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"mountain","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":2,"action_state":"unused","visited":false},{"land_type":"ore deposit","unit_type":"city","strength":3,"player":2,"action_state":"unused","visited":false}]],"map_string":"wwwwwl0cowllwsl0alwllwwll1cs1allswmlwllwwllwllwsllwwwww2al2co","action_extra":"","unit_array":[{"name":"navy","holds_strength":true,"cost":5,"available_tiles":["water"],"able_build":["army","blockade","city"],"actions":["transact","build","battle","trade","move"]},{"name":"army","holds_strength":true,"cost":4,"available_tiles":["land","soil"],"able_build":["blockade","city"],"actions":["transact","build","battle","trade","move"]},{"name":"city","holds_strength":true,"cost":5,"available_tiles":["soil","ore deposit"],"able_build":["army","navy","trader","blockade","city"],"actions":["produce","transact","build","battle","trade"]},{"name":"blockade","holds_strength":false,"cost":4,"available_tiles":["land"],"able_build":[],"actions":["remove"]},{"name":"trader","holds_strength":false,"cost":3,"available_tiles":["land","soil"],"able_build":[],"actions":["move"]}]};game_name=saka;game_data={"BOARD_ID":"Board","BOARD_WIDTH":7,"BOARD_HEIGHT":7,"BOARD_PIXEL_WIDTH":1000,"BOARD_PIXEL_HEIGHT":1000,"BOARD_CELL_PIXEL_WIDTH":142.85714285714286,"BOARD_CELL_PIXEL_HEIGHT":142.85714285714286,"OBJECT_NAME":"game","INFO_WIDTH":400,"TURN_BUTTON_HEIGHT":100,"selected_tile":[-1,-1],"actions":[],"player_amount":3,"player_turn":0,"player_array":[{"color":"#00ff1e","hover_color":"#00b200","is_dead":false,"name":""},{"color":"#ff0059","hover_color":"#b2000c","is_dead":false,"name":""},{"color":"#0033ff","hover_color":"#0000b2","is_dead":false,"name":""}],"html_board":{},"info":{},"do_action_html":{},"end_turn_html":{},"dialogue_box_html":{},"selectable_tiles":[],"battling":false,"board":[[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"ore deposit","unit_type":"city","strength":3,"player":0,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":0,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"soil","unit_type":"city","strength":3,"player":1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"mountain","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":2,"action_state":"unused","visited":false},{"land_type":"ore deposit","unit_type":"city","strength":3,"player":2,"action_state":"unused","visited":false}]],"map_string":"wwwwwl0cowllwsl0alwllwwll1cs1allswmlwllwwllwllwsllwwwww2al2co","action_extra":"","unit_array":[{"name":"navy","holds_strength":true,"cost":5,"available_tiles":["water"],"able_build":["army","blockade","city"],"actions":["transact","build","battle","trade","move"]},{"name":"army","holds_strength":true,"cost":4,"available_tiles":["land","soil"],"able_build":["blockade","city"],"actions":["transact","build","battle","trade","move"]},{"name":"city","holds_strength":true,"cost":5,"available_tiles":["soil","ore deposit"],"able_build":["army","navy","trader","blockade","city"],"actions":["produce","transact","build","battle","trade"]},{"name":"blockade","holds_strength":false,"cost":4,"available_tiles":["land"],"able_build":[],"actions":["remove"]},{"name":"trader","holds_strength":false,"cost":3,"available_tiles":["land","soil"],"able_build":[],"actions":["move"]}]};`
     //decodedCookie += `game_name=conty;game_data={"BOARD_ID":"Board","BOARD_WIDTH":10,"BOARD_HEIGHT":10,"BOARD_PIXEL_WIDTH":1000,"BOARD_PIXEL_HEIGHT":1000,"BOARD_CELL_PIXEL_WIDTH":100,"BOARD_CELL_PIXEL_HEIGHT":100,"OBJECT_NAME":"game","INFO_WIDTH":400,"TURN_BUTTON_HEIGHT":100,"selected_tile":[-1,-1],"actions":[],"player_amount":4,"player_turn":0,"player_array":[{"color":"#ff0000","hover_color":"#b20000","is_dead":false,"name":"a"},{"color":"#2bff00","hover_color":"#00b200","is_dead":false,"name":"b"},{"color":"#1100ff","hover_color":"#0000b2","is_dead":false,"name":"c"},{"color":"#ffea00","hover_color":"#b29d00","is_dead":false,"name":"d"}],"html_board":{},"info":{},"do_action_html":{},"end_turn_html":{},"dialogue_box_html":{},"selectable_tiles":[],"battling":false,"board":[[{"land_type":"soil","unit_type":"city","strength":3,"player":0,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":0,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"city","strength":3,"player":1,"action_state":"unused","visited":false}],[{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"ore deposit","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"mountain","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"mountain","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"soil","unit_type":"city","strength":3,"player":2,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"navy","strength":3,"player":2,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"mountain","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"ore deposit","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"mountain","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false}],[{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"water","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"none","strength":0,"player":-1,"action_state":"unused","visited":false},{"land_type":"land","unit_type":"army","strength":3,"player":3,"action_state":"unused","visited":false},{"land_type":"soil","unit_type":"city","strength":3,"player":3,"action_state":"unused","visited":false}]],"map_string":"0cs0allllllwwwlllllswwwwllswwwwww1csllwwwwwwl1alwswwslwsllwwwwlllllllwwwwlomml2cs2nwwwsllmollwwlllmlllwwslllll3al3cs","action_extra":"","unit_array":[{"name":"navy","holds_strength":true,"cost":5,"available_tiles":["water"],"able_build":["army","blockade","city"],"actions":["transact","build","battle","trade","move"]},{"name":"army","holds_strength":true,"cost":4,"available_tiles":["land","soil"],"able_build":["blockade","city"],"actions":["transact","build","battle","trade","move"]},{"name":"city","holds_strength":true,"cost":5,"available_tiles":["soil","ore deposit"],"able_build":["army","navy","trader","blockade","city"],"actions":["produce","transact","build","battle","trade"]},{"name":"blockade","holds_strength":false,"cost":4,"available_tiles":["land"],"able_build":[],"actions":["remove"]},{"name":"trader","holds_strength":false,"cost":3,"available_tiles":["land","soil"],"able_build":[],"actions":["move"]}]};`
-    let decodedCookie = decodeURIComponent(document.cookie);
+    let decodedCookie = localStorage.getItem("cookie");
+    if (decodedCookie == null)
+    {
+        alert("No save files available")
+        return;
+    }
     decodedCookie = decodedCookie.slice(0, -1);
     let parts = decodedCookie.split(";");
-    let prompt_text = "Which save file would you like?";
+    let prompt_text = "Which save file would you like? Type 'Delete' then a space, then the save name to delete a save";
     let save_files = [];
-    for (let i = parts.length-2; i >= 0; i -= 2)
+    for (let i = 0; i < parts.length; i++)
     {
-        let save_name = parts[i].split("=")[1];
-        if (save_files.includes(save_name)) continue;
+        let save_name = parts[i];
+        if (save_files.includes(save_name) || localStorage.getItem(save_name) == "F") continue;
         prompt_text += "\n" + save_name;
         save_files.push(save_name);
     }
     let save;
+    if (save_files.length == 0)
+    {
+        alert("No save files available")
+        return;
+    }
     while (true)
     {
         save = prompt(prompt_text);
+        if (save.length > 6)
+        {
+            if (save.slice(0, 6) == "Delete")
+            save = save.slice(7);
+            if (save_files.includes(save))
+            {
+                localStorage.setItem(save, "F");
+                return;
+            }
+        }
         if (save_files.includes(save)) break;
     }
 
-    let save_index;
-    for (let i = parts.length-2; i >= 0; i -= 2)
-    {
-        if (parts[i].split("=")[1] === save)
-        {
-            save_index = i;
-            break;
-        }
-    }
-
-    let game_string = parts[save_index + 1].split("=")[1];
+    let game_string = localStorage.getItem(save);
     console.log(game_string);
-
     body.innerHTML = "<div id='Board'></div><div id='Info'></div> <button id='DoAction'>Do Action</button> <button id='EndTurn'>End Turn</button> <button id='DialogueBox'></button>";
     game = new Game("Board", 0, 0, 1000, 1000, 0, "", [], "Info", 400, "game", "DoAction", "EndTurn", "DialogueBox", 100);
     Object.assign(game, JSON.parse(game_string));
-    game.set_boxes("Board", "Info", "DoAction", "EndTurn", "DialogueBox");
     let map = [];
+    let game_map = JSON.parse(game_string).board;
     for (let i = 0; i < game.BOARD_HEIGHT; i++)
     {
         map[i] = [];
         for (let j = 0; j < game.BOARD_WIDTH; j++)
         {
-            map[i][j] = new Cell("none", "none", 0, -1);
+            map[i][j] = new Cell(game_map[i][j].land_type, game_map[i][j].unit_type, game_map[i][j].strength, game_map[i][j].player);
+            map[i][j].action_state = game_map[i][j].action_state;
+            map[i][j].visited = game_map[i][j].visited;
         }
     }
     game.board = map;
-    game.set_map(game.map_string);
-    console.log(game);
+    let real_actions = [];
+    for (let action of game.actions)
+    {
+        real_actions.push(new Action([], "", "", game));
+        Object.assign(real_actions[real_actions.length-1], action);
+        let real_cells = [];
+        for (let cell of real_actions[real_actions.length-1].cells)
+        {
+            real_cells.push(new Cell("none", "none", 0, -1));
+            Object.assign(real_cells[real_cells.length-1], cell);
+        }
+        real_actions[real_actions.length-1].cells = real_cells;
+    }
+    game.actions = real_actions;
+    game.set_boxes("Board", "Info", "DoAction", "EndTurn", "DialogueBox");
+    window.addEventListener('pagehide', (event) => 
+    {
+        let jsonString = JSON.stringify(game);
+        let past_cookie = localStorage.getItem("cookie");
+        if (past_cookie == null) past_cookie = "";
+        localStorage.setItem("cookie", past_cookie + save + ";");
+        localStorage.setItem(save, jsonString);
+        // console.log("game_name=" + answer + ";game_data=" + jsonString + ";");
+    });
     game.render();
     return "";
 }
 
-while (true)
+// while (true)
+// {
+//     let answer;
+//     answer = prompt("Website is under maintenance. Please enter developer password if wanting to access website.")
+//     if (answer == "turtle") break;
+// }
+
+function test1()
 {
-    let answer;
-    answer = prompt("Website is under maintenance. Please enter developer password if wanting to access website.")
-    if (answer == "turtle") break;
+    console.log(JSON.stringify(game));
 }
